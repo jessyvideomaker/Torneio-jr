@@ -252,7 +252,7 @@ footer{flex-direction:column}
   } else {
     console.log('Times carregados:', times);
   }
-</script><section id="login-area" class="section">
+</script>
   <div class="container">
     <h2>ÁREA DE ACESSO</h2>
     <p>Entre na plataforma do Torneio JR.</p>
@@ -273,6 +273,71 @@ footer{flex-direction:column}
         <p>Acesse seu perfil e suas estatísticas.</p>
       </a>
     </div>
+  </div>
+</section><style>
+#login-area {
+  padding: 70px 20px;
+  background: #101411;
+  color: #fff;
+  text-align: center;
+}
+#login-area .login-title {
+  color: #a8ff36;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+#login-area .login-subtitle {
+  color: #aaa;
+  margin-bottom: 35px;
+}
+#login-area .login-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 20px;
+  max-width: 950px;
+  margin: auto;
+}
+#login-area .login-card {
+  background: #1b241c;
+  border: 1px solid #344b30;
+  border-radius: 14px;
+  padding: 30px 20px;
+  color: white;
+  text-decoration: none;
+  transition: .2s;
+}
+#login-area .login-card:hover {
+  border-color: #a8ff36;
+  transform: translateY(-4px);
+}
+#login-area .login-card h3 {
+  color: #a8ff36;
+  letter-spacing: 1px;
+}
+#login-area .login-card p {
+  color: #bbb;
+}
+</style>
+
+<section id="login-area">
+  <h2 class="login-title">ÁREA DE ACESSO</h2>
+  <p class="login-subtitle">O seu espaço dentro do Torneio JR.</p>
+
+  <div class="login-grid">
+    <a class="login-card" href="#login">
+      <h3>ADMINISTRADOR</h3>
+      <p>Gestão completa do campeonato.</p>
+    </a>
+
+    <a class="login-card" href="#login">
+      <h3>DIRIGENTE</h3>
+      <p>Gerencie seu time e seus atletas.</p>
+    </a>
+
+    <a class="login-card" href="#login">
+      <h3>JOGADOR</h3>
+      <p>Acesse seu perfil e estatísticas.</p>
+    </a>
   </div>
 </section></body>
 </html>
