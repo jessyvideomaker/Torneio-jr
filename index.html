@@ -233,5 +233,10 @@ footer{flex-direction:column}
 <div><strong>TORNEIO JR.</strong><br><br>ALÉM DA VÁRZEA · DA FAVELA PRO MUNDO</div>
 <div>EDIÇÃO NOVEMBRO 2026<br><br>© TORNEIO JR</div>
 </footer>
-</body>
+<script type="module">
+  import { supabase } from './supabase.js';
+
+  window.supabase = supabase;
+  console.log('Conexão com Supabase preparada!');
+</script></body>
 </html>
