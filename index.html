@@ -14,31 +14,31 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:#fff;font-family:Inter,Arial,sans-serif}
 a{color:inherit;text-decoration:none}
 .topline{height:4px;background:var(--green)}
-header{height:78px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;background:#0b100d;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+header{min-height:78px;padding:14px 6%;display:flex;align-items:center;justify-content:space-between;background:#0b100d;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-mark{width:42px;height:42px;border:2px solid var(--green);display:grid;place-items:center;color:var(--green);font-family:'Barlow Condensed';font-size:24px;font-weight:900;transform:skew(-7deg)}
 .brand-name{font-family:'Barlow Condensed';font-weight:900;font-size:25px;letter-spacing:1px}
 .brand-name span{color:var(--green)}
 .brand small{display:block;color:var(--muted);font-size:8px;letter-spacing:3px}
 nav{display:flex;gap:25px;align-items:center}
-nav a{font-size:12px;color:#b7c0b9;font-weight:700;transition:.2s}
+nav a{font-size:12px;color:#b7c0b9;font-weight:700}
 nav a:hover{color:var(--green)}
 .admin{border:1px solid #53634e;padding:11px 16px;border-radius:4px;color:var(--green)}
 .hero{min-height:440px;padding:75px 7%;position:relative;overflow:hidden;display:flex;align-items:center;background:radial-gradient(ellipse at 80% 50%,#25472b 0%,#14271a 25%,#0b120d 62%,#080b09 100%)}
 .hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 55px,rgba(181,255,56,.035) 56px 58px);pointer-events:none}
 .hero:after{content:"JR";position:absolute;right:7%;top:-90px;font-family:'Barlow Condensed';font-weight:900;font-size:490px;line-height:1;color:rgba(181,255,56,.055);transform:skew(-9deg)}
 .hero-content{position:relative;z-index:1;max-width:680px}
-.eyebrow{font-size:11px;letter-spacing:4px;color:var(--green);font-weight:800}
+.eyebrow,.kicker{color:var(--green);font-size:11px;letter-spacing:3px;font-weight:800}
 .hero h1{font-family:'Barlow Condensed';font-size:clamp(65px,10vw,112px);line-height:.86;letter-spacing:-2px;margin:24px 0}
 .hero h1 span{color:var(--green)}
 .hero p{color:#c0cbc2;max-width:450px;line-height:1.8;font-size:14px}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
-.btn{padding:15px 22px;background:var(--green);color:#10160c;font-size:11px;font-weight:900;letter-spacing:1px;border-radius:3px}
-.btn-outline{padding:14px 22px;border:1px solid #657366;color:white;font-size:11px;font-weight:800;border-radius:3px}
+.btn{display:inline-block;padding:15px 22px;background:var(--green);color:#10160c;font-size:11px;font-weight:900;letter-spacing:1px;border-radius:3px;border:0;cursor:pointer}
+.btn-outline{display:inline-block;padding:14px 22px;border:1px solid #657366;color:white;font-size:11px;font-weight:800;border-radius:3px}
 .hero-label{position:absolute;bottom:25px;right:7%;color:#a4b09f;font-size:10px;letter-spacing:3px}
 .container{max-width:1320px;margin:auto;padding:42px 5%}
 .section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}
-.kicker{color:var(--green);font-size:10px;font-weight:800;letter-spacing:3px;margin-bottom:8px}
+.kicker{font-size:10px;margin-bottom:8px}
 .section-head h2{font-family:'Barlow Condensed';font-size:34px;letter-spacing:1px}
 .view{font-size:11px;color:var(--green);font-weight:700}
 .tournament{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
@@ -47,7 +47,7 @@ nav a:hover{color:var(--green)}
 .feature>*{position:relative;z-index:1}
 .pill{display:inline-block;border:1px solid #5d8741;color:var(--green);padding:7px 10px;font-size:9px;letter-spacing:2px;font-weight:800;border-radius:2px}
 .feature h3{font-family:'Barlow Condensed';font-size:43px;margin:20px 0 5px}
-.feature p{color:#aab6ac;font-size:12px;line-height:1.8}
+.feature p,.quick-card p{color:#aab6ac;font-size:12px;line-height:1.8}
 .feature-stats{display:flex;gap:30px;margin-top:25px}
 .feature-stats strong{display:block;color:var(--green);font-size:24px}
 .feature-stats span{font-size:9px;color:#aab6ac;letter-spacing:1px}
@@ -55,7 +55,7 @@ nav a:hover{color:var(--green)}
 .quick-card{background:var(--panel);border:1px solid var(--line);padding:20px;border-radius:6px}
 .quick-card .number{font-family:'Barlow Condensed';font-size:34px;color:var(--green)}
 .quick-card h4{font-size:12px;margin:6px 0}
-.quick-card p{font-size:10px;color:var(--muted);line-height:1.5}
+.quick-card p{font-size:10px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
 .stat{background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:5px}
 .stat strong{font-family:'Barlow Condensed';font-size:32px;color:var(--green)}
@@ -79,20 +79,38 @@ td{padding:12px 7px;border-top:1px solid #202b23;text-align:center;font-size:11p
 .club{width:35%;font-size:11px;font-weight:700}
 .club:last-child{text-align:right}
 .score{background:#202b23;border:1px solid #354536;border-radius:4px;padding:9px 12px;color:var(--green);font-size:12px;font-weight:900;white-space:nowrap}
-.match-info{text-align:center;font-size:8px;color:var(--muted);line-height:1.8}
 .groups{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .group-card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px}
 .group-card h3{color:var(--green);font-family:'Barlow Condensed';font-size:25px;margin-bottom:14px}
 .group-card p{padding:10px 0;border-bottom:1px solid #253027;font-size:11px;color:#dbe2dc}
 .group-card p:last-child{border:0}
 .group-card b{float:right;color:#849187;font-size:10px}
-.cta{padding:30px;background:linear-gradient(110deg,#1b321e,#111913);border:1px solid #354536;border-radius:6px;display:flex;justify-content:space-between;align-items:center;gap:20px}
-.cta h2{font-family:'Barlow Condensed';font-size:32px}
-.cta p{font-size:11px;color:#aab6ac;margin-top:5px}
+
+/* ÁREA DE ACESSO */
+.access-section{margin-top:55px;padding:38px 28px;background:linear-gradient(125deg,#14251a,#0e1510);border:1px solid #354536;border-radius:8px}
+.access-heading{text-align:center;margin-bottom:28px}
+.access-heading h2{font-family:'Barlow Condensed';font-size:38px;margin:8px 0;color:#fff}
+.access-heading p{font-size:12px;color:#aab6ac}
+.access-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.access-card{display:block;text-align:left;padding:25px 22px;background:#111713;border:1px solid #344b30;border-radius:7px;transition:.2s}
+.access-card:hover{border-color:var(--green);transform:translateY(-3px)}
+.access-card .access-number{font-family:'Barlow Condensed';font-size:30px;color:var(--green)}
+.access-card h3{font-family:'Barlow Condensed';font-size:25px;letter-spacing:1px;margin:10px 0}
+.access-card p{font-size:11px;color:#aab6ac;line-height:1.6}
+.access-card span{display:inline-block;margin-top:18px;color:var(--green);font-size:10px;font-weight:800;letter-spacing:1px}
+.login-box{display:none;max-width:460px;margin:28px auto 0;padding:25px;background:#080d09;border:1px solid #344b30;border-radius:7px}
+.login-box h3{font-family:'Barlow Condensed';font-size:27px;color:var(--green);margin-bottom:8px}
+.login-box p{font-size:11px;color:#aab6ac;margin-bottom:18px}
+.login-box label{display:block;font-size:10px;color:#b7c0b9;margin:12px 0 6px}
+.login-box input{width:100%;padding:13px;background:#172019;border:1px solid #344b30;border-radius:4px;color:white;font-size:13px}
+.login-box button{width:100%;margin-top:18px}
+.login-message{font-size:12px;line-height:1.6;margin-top:14px;color:var(--green)}
+.contact-line{text-align:center;margin-top:25px;font-size:11px;color:#aab6ac}
+.contact-line a{color:var(--green);font-weight:800}
 footer{border-top:1px solid var(--line);padding:28px 6%;display:flex;justify-content:space-between;gap:20px;color:#849187;font-size:10px}
 footer strong{color:var(--green);letter-spacing:2px}
 @media(max-width:800px){
-header{height:auto;min-height:72px;padding:14px 5%;flex-wrap:wrap}
+header{padding:14px 5%}
 nav{order:3;width:100%;overflow:auto;padding:12px 0 3px;gap:20px}
 nav a{white-space:nowrap;font-size:10px}
 .admin{font-size:10px;padding:9px}
@@ -102,17 +120,18 @@ nav a{white-space:nowrap;font-size:10px}
 .tournament,.columns{grid-template-columns:1fr}
 .stats{grid-template-columns:1fr 1fr}
 .groups{grid-template-columns:1fr}
+.access-grid{grid-template-columns:1fr}
 .feature h3{font-size:36px}
 .container{padding:32px 4%}
-.cta{align-items:flex-start;flex-direction:column}
 footer{flex-direction:column}
 }
 </style>
 </head>
 <body>
 <div class="topline"></div>
+
 <header>
-<a class="brand" href="#">
+<a class="brand" href="#inicio">
 <div class="brand-mark">JR</div>
 <div class="brand-name">TORNEIO <span>JR.</span><small>ALÉM DA VÁRZEA</small></div>
 </a>
@@ -222,25 +241,140 @@ footer{flex-direction:column}
 </div>
 </section>
 
-<section id="acesso" style="margin-top:55px">
-<div class="cta">
-<div><div class="kicker">FAÇA PARTE DO JOGO</div><h2>O PRÓXIMO CAPÍTULO É DENTRO DE CAMPO.</h2><p>Área de acesso para atletas, responsáveis e organização.</p></div>
-<a class="btn" href="mailto:begoncalves2017fut@gmail.com">FALE COM A ORGANIZAÇÃO ↗</a>
+<section id="acesso" class="access-section">
+<div class="access-heading">
+<div class="kicker">PLATAFORMA TORNEIO JR</div>
+<h2>ÁREA DE ACESSO</h2>
+<p>Escolha seu tipo de acesso para entrar na plataforma.</p>
+</div>
+
+<div class="access-grid">
+<button class="access-card" type="button" data-role="admin">
+<div class="access-number">01</div>
+<h3>ADMINISTRADOR</h3>
+<p>Gestão do campeonato, equipes, atletas, jogos e resultados.</p>
+<span>ACESSAR PAINEL ↗</span>
+</button>
+
+<button class="access-card" type="button" data-role="manager">
+<div class="access-number">02</div>
+<h3>DIRIGENTE</h3>
+<p>Área de gerenciamento da equipe e do elenco.</p>
+<span>ACESSAR ÁREA ↗</span>
+</button>
+
+<button class="access-card" type="button" data-role="player">
+<div class="access-number">03</div>
+<h3>JOGADOR</h3>
+<p>Perfil individual, informações e estatísticas do atleta.</p>
+<span>ACESSAR PERFIL ↗</span>
+</button>
+</div>
+
+<div class="login-box" id="login-box">
+<h3 id="login-title">ENTRAR NA PLATAFORMA</h3>
+<p>Informe seu e-mail e sua senha cadastrados.</p>
+<form id="login-form">
+<label for="login-email">E-MAIL</label>
+<input id="login-email" type="email" autocomplete="email" required placeholder="Seu e-mail">
+<label for="login-password">SENHA</label>
+<input id="login-password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+<button class="btn" type="submit" id="login-submit">ENTRAR</button>
+</form>
+<div class="login-message" id="login-message" role="status"></div>
+</div>
+
+<div class="contact-line">
+Precisa de ajuda? <a href="mailto:begoncalves2017fut@gmail.com">FALE COM A ORGANIZAÇÃO ↗</a>
 </div>
 </section>
 </main>
+
 <footer>
 <div><strong>TORNEIO JR.</strong><br><br>ALÉM DA VÁRZEA · DA FAVELA PRO MUNDO</div>
 <div>EDIÇÃO NOVEMBRO 2026<br><br>© TORNEIO JR</div>
 </footer>
+
 <script type="module">
-  import { supabase } from './supabase.js';
+import { supabase } from './supabase.js';
 
-  window.supabase = supabase;
-  console.log('Conexão com Supabase preparada!');
-</script><script type="module">
-  import { supabase } from './supabase.js';
+let selectedRole = null;
 
+const loginBox = document.getElementById('login-box');
+const loginTitle = document.getElementById('login-title');
+const loginMessage = document.getElementById('login-message');
+const loginForm = document.getElementById('login-form');
+const loginSubmit = document.getElementById('login-submit');
+
+document.querySelectorAll('[data-role]').forEach(button => {
+  button.addEventListener('click', () => {
+    selectedRole = button.dataset.role;
+    const titles = {
+      admin: 'ACESSO DO ADMINISTRADOR',
+      manager: 'ACESSO DO DIRIGENTE',
+      player: 'ACESSO DO JOGADOR'
+    };
+    loginTitle.textContent = titles[selectedRole];
+    loginMessage.textContent = '';
+    loginBox.style.display = 'block';
+    loginBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  if (!selectedRole) {
+    loginMessage.textContent = 'Escolha primeiro seu tipo de acesso.';
+    return;
+  }
+
+  loginSubmit.disabled = true;
+  loginSubmit.textContent = 'VERIFICANDO...';
+  loginMessage.textContent = '';
+
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role, full_name')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) throw profileError;
+
+    const roleNames = {
+      admin: 'admin',
+      manager: 'manager',
+      player: 'player'
+    };
+
+    if (profile.role !== roleNames[selectedRole]) {
+      await supabase.auth.signOut();
+      loginMessage.textContent = 'Esta conta não possui permissão para esse tipo de acesso. Confira a opção escolhida ou fale com a organização.';
+      return;
+    }
+
+    loginMessage.textContent = 'Login confirmado! Sua conta foi autenticada. A próxima etapa será liberar o painel correspondente ao seu perfil.';
+  } catch (error) {
+    loginMessage.textContent = 'Não foi possível entrar. Confira seu e-mail e sua senha.';
+    console.error('Erro no login:', error);
+  } finally {
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = 'ENTRAR';
+  }
+});
+
+try {
   const { data: times, error } = await supabase
     .from('teams')
     .select('name')
@@ -250,94 +384,11 @@ footer{flex-direction:column}
   if (error) {
     console.error('Erro ao carregar times:', error);
   } else {
-    console.log('Times carregados:', times);
+    console.log('Times aprovados encontrados:', times);
   }
+} catch (error) {
+  console.error('Falha na conexão com Supabase:', error);
+}
 </script>
-  <div class="container">
-    <h2>ÁREA DE ACESSO</h2>
-    <p>Entre na plataforma do Torneio JR.</p>
-
-    <div class="cards">
-      <a class="card" href="#login">
-        <h3>ADMINISTRADOR</h3>
-        <p>Acesso exclusivo à organização.</p>
-      </a>
-
-      <a class="card" href="#login">
-        <h3>DIRIGENTE</h3>
-        <p>Gerencie seu time e seus atletas.</p>
-      </a>
-
-      <a class="card" href="#login">
-        <h3>JOGADOR</h3>
-        <p>Acesse seu perfil e suas estatísticas.</p>
-      </a>
-    </div>
-  </div>
-</section><style>
-#login-area {
-  padding: 70px 20px;
-  background: #101411;
-  color: #fff;
-  text-align: center;
-}
-#login-area .login-title {
-  color: #a8ff36;
-  font-size: 30px;
-  margin-bottom: 10px;
-}
-#login-area .login-subtitle {
-  color: #aaa;
-  margin-bottom: 35px;
-}
-#login-area .login-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-  gap: 20px;
-  max-width: 950px;
-  margin: auto;
-}
-#login-area .login-card {
-  background: #1b241c;
-  border: 1px solid #344b30;
-  border-radius: 14px;
-  padding: 30px 20px;
-  color: white;
-  text-decoration: none;
-  transition: .2s;
-}
-#login-area .login-card:hover {
-  border-color: #a8ff36;
-  transform: translateY(-4px);
-}
-#login-area .login-card h3 {
-  color: #a8ff36;
-  letter-spacing: 1px;
-}
-#login-area .login-card p {
-  color: #bbb;
-}
-</style>
-
-<section id="login-area">
-  <h2 class="login-title">ÁREA DE ACESSO</h2>
-  <p class="login-subtitle">O seu espaço dentro do Torneio JR.</p>
-
-  <div class="login-grid">
-    <a class="login-card" href="#login">
-      <h3>ADMINISTRADOR</h3>
-      <p>Gestão completa do campeonato.</p>
-    </a>
-
-    <a class="login-card" href="#login">
-      <h3>DIRIGENTE</h3>
-      <p>Gerencie seu time e seus atletas.</p>
-    </a>
-
-    <a class="login-card" href="#login">
-      <h3>JOGADOR</h3>
-      <p>Acesse seu perfil e estatísticas.</p>
-    </a>
-  </div>
-</section></body>
+</body>
 </html>
