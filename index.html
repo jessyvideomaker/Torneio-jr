@@ -238,5 +238,19 @@ footer{flex-direction:column}
 
   window.supabase = supabase;
   console.log('Conexão com Supabase preparada!');
+</script><script type="module">
+  import { supabase } from './supabase.js';
+
+  const { data: times, error } = await supabase
+    .from('teams')
+    .select('name')
+    .eq('status', 'approved')
+    .order('name');
+
+  if (error) {
+    console.error('Erro ao carregar times:', error);
+  } else {
+    console.log('Times carregados:', times);
+  }
 </script></body>
 </html>
