@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TORNEIO JR | Além da Várzea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{--green:#b5ff38;--bg:#080b09;--panel:#111713;--line:#263129;--muted:#929d94}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:#fff;font-family:Inter,Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+.topline{height:4px;background:var(--green)}
+header{height:78px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;background:#0b100d;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{width:42px;height:42px;border:2px solid var(--green);display:grid;place-items:center;color:var(--green);font-family:'Barlow Condensed';font-size:24px;font-weight:900;transform:skew(-7deg)}
+.brand-name{font-family:'Barlow Condensed';font-weight:900;font-size:25px;letter-spacing:1px}
+.brand-name span{color:var(--green)}
+.brand small{display:block;color:var(--muted);font-size:8px;letter-spacing:3px}
+nav{display:flex;gap:25px;align-items:center}
+nav a{font-size:12px;color:#b7c0b9;font-weight:700;transition:.2s}
+nav a:hover{color:var(--green)}
+.admin{border:1px solid #53634e;padding:11px 16px;border-radius:4px;color:var(--green)}
+.hero{min-height:440px;padding:75px 7%;position:relative;overflow:hidden;display:flex;align-items:center;background:radial-gradient(ellipse at 80% 50%,#25472b 0%,#14271a 25%,#0b120d 62%,#080b09 100%)}
+.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 55px,rgba(181,255,56,.035) 56px 58px);pointer-events:none}
+.hero:after{content:"JR";position:absolute;right:7%;top:-90px;font-family:'Barlow Condensed';font-weight:900;font-size:490px;line-height:1;color:rgba(181,255,56,.055);transform:skew(-9deg)}
+.hero-content{position:relative;z-index:1;max-width:680px}
+.eyebrow{font-size:11px;letter-spacing:4px;color:var(--green);font-weight:800}
+.hero h1{font-family:'Barlow Condensed';font-size:clamp(65px,10vw,112px);line-height:.86;letter-spacing:-2px;margin:24px 0}
+.hero h1 span{color:var(--green)}
+.hero p{color:#c0cbc2;max-width:450px;line-height:1.8;font-size:14px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.btn{padding:15px 22px;background:var(--green);color:#10160c;font-size:11px;font-weight:900;letter-spacing:1px;border-radius:3px}
+.btn-outline{padding:14px 22px;border:1px solid #657366;color:white;font-size:11px;font-weight:800;border-radius:3px}
+.hero-label{position:absolute;bottom:25px;right:7%;color:#a4b09f;font-size:10px;letter-spacing:3px}
+.container{max-width:1320px;margin:auto;padding:42px 5%}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}
+.kicker{color:var(--green);font-size:10px;font-weight:800;letter-spacing:3px;margin-bottom:8px}
+.section-head h2{font-family:'Barlow Condensed';font-size:34px;letter-spacing:1px}
+.view{font-size:11px;color:var(--green);font-weight:700}
+.tournament{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.feature{padding:27px;background:linear-gradient(125deg,#1b2c1e,#101712 70%);border:1px solid #354536;border-radius:7px;position:relative;overflow:hidden}
+.feature:after{content:"JR";position:absolute;right:12px;bottom:-55px;font-family:'Barlow Condensed';font-size:200px;font-weight:900;color:rgba(181,255,56,.06)}
+.feature>*{position:relative;z-index:1}
+.pill{display:inline-block;border:1px solid #5d8741;color:var(--green);padding:7px 10px;font-size:9px;letter-spacing:2px;font-weight:800;border-radius:2px}
+.feature h3{font-family:'Barlow Condensed';font-size:43px;margin:20px 0 5px}
+.feature p{color:#aab6ac;font-size:12px;line-height:1.8}
+.feature-stats{display:flex;gap:30px;margin-top:25px}
+.feature-stats strong{display:block;color:var(--green);font-size:24px}
+.feature-stats span{font-size:9px;color:#aab6ac;letter-spacing:1px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.quick-card{background:var(--panel);border:1px solid var(--line);padding:20px;border-radius:6px}
+.quick-card .number{font-family:'Barlow Condensed';font-size:34px;color:var(--green)}
+.quick-card h4{font-size:12px;margin:6px 0}
+.quick-card p{font-size:10px;color:var(--muted);line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:5px}
+.stat strong{font-family:'Barlow Condensed';font-size:32px;color:var(--green)}
+.stat span{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.columns{display:grid;grid-template-columns:1.35fr .85fr;gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.panel-title{padding:19px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.panel-title h3{font-family:'Barlow Condensed';font-size:22px;letter-spacing:1px}
+.panel-title span{font-size:9px;color:var(--green);letter-spacing:1px}
+.group-label{padding:12px 18px;color:var(--green);font-size:10px;font-weight:800;letter-spacing:2px;background:#172019}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;color:#829084;text-align:center;padding:12px 7px;font-weight:700}
+th:nth-child(2),td:nth-child(2){text-align:left}
+td{padding:12px 7px;border-top:1px solid #202b23;text-align:center;font-size:11px;color:#dbe2dc}
+.team{display:flex;align-items:center;gap:9px;font-weight:700}
+.crest{width:25px;height:25px;border-radius:5px;background:#26372a;border:1px solid #405640;display:grid;place-items:center;color:var(--green);font-size:9px;font-weight:900}
+.points{color:var(--green);font-weight:900}
+.schedule{padding:0 18px}
+.match{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid #263129;gap:8px}
+.match:last-child{border:0}
+.club{width:35%;font-size:11px;font-weight:700}
+.club:last-child{text-align:right}
+.score{background:#202b23;border:1px solid #354536;border-radius:4px;padding:9px 12px;color:var(--green);font-size:12px;font-weight:900;white-space:nowrap}
+.match-info{text-align:center;font-size:8px;color:var(--muted);line-height:1.8}
+.groups{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.group-card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px}
+.group-card h3{color:var(--green);font-family:'Barlow Condensed';font-size:25px;margin-bottom:14px}
+.group-card p{padding:10px 0;border-bottom:1px solid #253027;font-size:11px;color:#dbe2dc}
+.group-card p:last-child{border:0}
+.group-card b{float:right;color:#849187;font-size:10px}
+.cta{padding:30px;background:linear-gradient(110deg,#1b321e,#111913);border:1px solid #354536;border-radius:6px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.cta h2{font-family:'Barlow Condensed';font-size:32px}
+.cta p{font-size:11px;color:#aab6ac;margin-top:5px}
+footer{border-top:1px solid var(--line);padding:28px 6%;display:flex;justify-content:space-between;gap:20px;color:#849187;font-size:10px}
+footer strong{color:var(--green);letter-spacing:2px}
+@media(max-width:800px){
+header{height:auto;min-height:72px;padding:14px 5%;flex-wrap:wrap}
+nav{order:3;width:100%;overflow:auto;padding:12px 0 3px;gap:20px}
+nav a{white-space:nowrap;font-size:10px}
+.admin{font-size:10px;padding:9px}
+.hero{min-height:390px;padding:65px 6%}
+.hero:after{font-size:300px;right:-25px;top:10px}
+.hero-label{display:none}
+.tournament,.columns{grid-template-columns:1fr}
+.stats{grid-template-columns:1fr 1fr}
+.groups{grid-template-columns:1fr}
+.feature h3{font-size:36px}
+.container{padding:32px 4%}
+.cta{align-items:flex-start;flex-direction:column}
+footer{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header>
+<a class="brand" href="#">
+<div class="brand-mark">JR</div>
+<div class="brand-name">TORNEIO <span>JR.</span><small>ALÉM DA VÁRZEA</small></div>
+</a>
+<nav>
+<a href="#inicio">INÍCIO</a>
+<a href="#campeonato">CAMPEONATO</a>
+<a href="#classificacao">CLASSIFICAÇÃO</a>
+<a href="#jogos">JOGOS</a>
+<a href="#grupos">EQUIPES</a>
+</nav>
+<a class="admin" href="#acesso">ÁREA DO USUÁRIO ↗</a>
+</header>
+
+<section class="hero" id="inicio">
+<div class="hero-content">
+<div class="eyebrow">FUTEBOL · PAIXÃO · HISTÓRIA</div>
+<h1>DA FAVELA<br>PRO <span>MUNDO.</span></h1>
+<p>O talento não escolhe endereço. A oportunidade começa dentro de campo. Acompanhe o campeonato, os resultados e quem está fazendo história no Torneio JR.</p>
+<div class="hero-actions">
+<a class="btn" href="#campeonato">ACOMPANHAR CAMPEONATO ↗</a>
+<a class="btn-outline" href="#classificacao">VER CLASSIFICAÇÃO</a>
+</div>
+</div>
+<div class="hero-label">TORNEIO JR · EDIÇÃO 2026</div>
+</section>
+
+<main class="container">
+<section id="campeonato">
+<div class="section-head">
+<div><div class="kicker">EM DESTAQUE</div><h2>O CAMPEONATO</h2></div>
+<span class="view">TEMPORADA 2026</span>
+</div>
+<div class="tournament">
+<div class="feature">
+<span class="pill">EDIÇÃO NOVEMBRO 2026</span>
+<h3>TORNEIO JR</h3>
+<p>Doze equipes. Três grupos. Um só objetivo: levantar a taça.</p>
+<div class="feature-stats">
+<div><strong>12</strong><span>EQUIPES</span></div>
+<div><strong>03</strong><span>GRUPOS</span></div>
+<div><strong>18</strong><span>JOGOS NA FASE</span></div>
+</div>
+</div>
+<div class="quick">
+<div class="quick-card"><div class="number">01</div><h4>FASE DE GRUPOS</h4><p>Todos contra todos dentro de cada grupo.</p></div>
+<div class="quick-card"><div class="number">08</div><h4>CLASSIFICADOS</h4><p>Os dois melhores de cada grupo e os dois melhores terceiros.</p></div>
+<div class="quick-card"><div class="number">04</div><h4>QUARTAS DE FINAL</h4><p>Oito equipes seguem na disputa.</p></div>
+<div class="quick-card"><div class="number">01</div><h4>GRANDE CAMPEÃO</h4><p>Uma taça. Uma história para contar.</p></div>
+</div>
+</div>
+<div class="stats">
+<div class="stat"><strong>12</strong><span>CLUBES NA DISPUTA</span></div>
+<div class="stat"><strong>03</strong><span>GRUPOS</span></div>
+<div class="stat"><strong>18</strong><span>PARTIDAS NA PRIMEIRA FASE</span></div>
+<div class="stat"><strong>01</strong><span>SONHO: A TAÇA</span></div>
+</div>
+</section>
+
+<section id="classificacao" style="margin-top:55px">
+<div class="section-head"><div><div class="kicker">QUEM SOBE NA TABELA?</div><h2>CLASSIFICAÇÃO</h2></div><span class="view">FASE DE GRUPOS</span></div>
+<div class="columns">
+<div class="panel">
+<div class="panel-title"><h3>TABELA DOS GRUPOS</h3><span>EDIÇÃO 2026</span></div>
+<div class="group-label">GRUPO A</div>
+<table><thead><tr><th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>
+<tr><td>1</td><td><div class="team"><span class="crest">CA</span>Cassino FC</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>2</td><td><div class="team"><span class="crest">NA</span>Napoli</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>3</td><td><div class="team"><span class="crest">BL</span>Blackout</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>4</td><td><div class="team"><span class="crest">FI</span>Fiorentina Fut 7</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<div class="group-label">GRUPO B</div>
+<table><thead><tr><th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>
+<tr><td>1</td><td><div class="team"><span class="crest">FN</span>Fúria Negra</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>2</td><td><div class="team"><span class="crest">TD</span>TDR</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>3</td><td><div class="team"><span class="crest">IB</span>IBIS FC</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>4</td><td><div class="team"><span class="crest">GU</span>Guadalajara</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<div class="group-label">GRUPO C</div>
+<table><thead><tr><th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>
+<tr><td>1</td><td><div class="team"><span class="crest">FF</span>FF7 PTB</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>2</td><td><div class="team"><span class="crest">SU</span>Subestimados FC</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>3</td><td><div class="team"><span class="crest">NZ</span>NZR</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+<tr><td>4</td><td><div class="team"><span class="crest">SP</span>Spartak Betim</div></td><td class="points">0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+</div>
+
+<div class="panel" id="jogos">
+<div class="panel-title"><h3>PRÓXIMOS CONFRONTOS</h3><span>FASE DE GRUPOS</span></div>
+<div class="schedule">
+<div class="match"><div class="club">Cassino FC</div><div class="score">VS</div><div class="club">Fiorentina Fut 7</div></div>
+<div class="match"><div class="club">Napoli</div><div class="score">VS</div><div class="club">Blackout</div></div>
+<div class="match"><div class="club">Fúria Negra</div><div class="score">VS</div><div class="club">Guadalajara</div></div>
+<div class="match"><div class="club">TDR</div><div class="score">VS</div><div class="club">IBIS FC</div></div>
+<div class="match"><div class="club">FF7 PTB</div><div class="score">VS</div><div class="club">Spartak Betim</div></div>
+<div class="match"><div class="club">Subestimados</div><div class="score">VS</div><div class="club">NZR</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="grupos" style="margin-top:55px">
+<div class="section-head"><div><div class="kicker">OS 12 DESAFIANTES</div><h2>AS EQUIPES</h2></div><span class="view">3 GRUPOS · 12 TIMES</span></div>
+<div class="groups">
+<div class="group-card"><h3>GRUPO A</h3><p>Cassino FC <b>A1</b></p><p>Napoli <b>A2</b></p><p>Blackout <b>A3</b></p><p>Fiorentina Fut 7 <b>A4</b></p></div>
+<div class="group-card"><h3>GRUPO B</h3><p>Fúria Negra <b>B1</b></p><p>TDR <b>B2</b></p><p>IBIS FC <b>B3</b></p><p>Guadalajara <b>B4</b></p></div>
+<div class="group-card"><h3>GRUPO C</h3><p>FF7 PTB <b>C1</b></p><p>Subestimados FC <b>C2</b></p><p>NZR <b>C3</b></p><p>Spartak Betim <b>C4</b></p></div>
+</div>
+</section>
+
+<section id="acesso" style="margin-top:55px">
+<div class="cta">
+<div><div class="kicker">FAÇA PARTE DO JOGO</div><h2>O PRÓXIMO CAPÍTULO É DENTRO DE CAMPO.</h2><p>Área de acesso para atletas, responsáveis e organização.</p></div>
+<a class="btn" href="mailto:begoncalves2017fut@gmail.com">FALE COM A ORGANIZAÇÃO ↗</a>
+</div>
+</section>
+</main>
+<footer>
+<div><strong>TORNEIO JR.</strong><br><br>ALÉM DA VÁRZEA · DA FAVELA PRO MUNDO</div>
+<div>EDIÇÃO NOVEMBRO 2026<br><br>© TORNEIO JR</div>
+</footer>
+</body>
+</html>
