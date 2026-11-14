@@ -43,6 +43,10 @@ import { supabase } from './supabase.js';
         background: #e34b4b;
         color: white;
       }
+      .excluir-equipe {
+        background: #8f2525;
+        color: white;
+      }
       .status-equipe {
         color: #b5ff38;
         font-weight: bold;
@@ -103,6 +107,9 @@ import { supabase } from './supabase.js';
           <p><strong>Campeonato:</strong> ${escapar(equipe.competition_name || 'Não informado')}</p>
           <p><strong>Status:</strong> <span class="status-equipe">${escapar(status)}</span></p>
           ${botoes}
+          <button class="excluir-equipe" data-action="delete" data-id="${escapar(equipe.id)}">
+            EXCLUIR EQUIPE
+          </button>
         </div>
       `;
     }).join('');
@@ -124,6 +131,26 @@ import { supabase } from './supabase.js';
     }
 
     alert('Status da equipe atualizado com sucesso!');
+    carregarEquipes();
+  }
+
+  async function excluirEquipe(id, nome) {
+    const confirmou = confirm(
+      `ATENÇÃO!\n\nDeseja realmente excluir a equipe "${nome}"?\n\nOs atletas serão preservados, mas ficarão sem equipe vinculada. A comissão técnica e os grupos vinculados serão excluídos. Equipes com partidas não poderão ser excluídas.`
+    );
+
+    if (!confirmou) return;
+
+    const { error } = await supabase.rpc('admin_delete_team', {
+      p_team_id: id
+    });
+
+    if (error) {
+      alert('Não foi possível excluir a equipe:\n' + error.message);
+      return;
+    }
+
+    alert('Equipe excluída com sucesso!');
     carregarEquipes();
   }
 
@@ -154,7 +181,7 @@ import { supabase } from './supabase.js';
     secao.style.display = 'none';
     secao.innerHTML = `
       <h2>GESTÃO DE EQUIPES</h2>
-      <p>Consulte, aprove ou recuse as equipes inscritas.</p>
+      <p>Consulte, aprove, recuse ou exclua equipes inscritas.</p>
       <button id="atualizar-lista-equipes" style="padding:10px;margin-bottom:12px;cursor:pointer;">
         ATUALIZAR LISTA
       </button>
@@ -178,10 +205,17 @@ import { supabase } from './supabase.js';
       const botaoAcao = event.target.closest('button[data-id]');
       if (!botaoAcao) return;
 
-      atualizarStatus(
-        botaoAcao.dataset.id,
-        botaoAcao.dataset.status
-      );
+      const id = botaoAcao.dataset.id;
+
+      if (botaoAcao.dataset.action === 'delete') {
+        const equipe = botaoAcao.closest('.equipe-admin');
+        const nome = equipe.querySelector('h3')?.textContent || 'Equipe';
+
+        excluirEquipe(id, nome);
+        return;
+      }
+
+      atualizarStatus(id, botaoAcao.dataset.status);
     });
   }
 
