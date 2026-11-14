@@ -2,18 +2,56 @@
 import { supabase } from './supabase.js';
 
 let usuarioAtual = null;
+let equipesDoDirigente = [];
 
-document.addEventListener('DOMContentLoaded', iniciarPainelDirigente);
+function estiloCampo() {
+  return `
+    width:100%;
+    box-sizing:border-box;
+    padding:14px;
+    margin:7px 0 14px;
+    border:1px solid #303a32;
+    border-radius:9px;
+    background:#111713;
+    color:#fff;
+    font-size:15px;
+  `;
+}
 
-async function iniciarPainelDirigente() {
-  const { data: { session } } = await supabase.auth.getSession();
+function estiloBotao() {
+  return `
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:9px;
+    background:#b5ff38;
+    color:#080b09;
+    font-weight:800;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:8px;
+  `;
+}
 
-  if (session) {
-    await verificarDirigente(session.user);
-  }
+function escapar(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[caractere]);
+}
 
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+function iniciarPainelDirigente() {
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (!error && data.session) {
+      verificarDirigente(data.session.user);
+    }
+  });
+
+  supabase.auth.onAuthStateChange((evento, session) => {
+    if (evento === 'SIGNED_IN' && session) {
       setTimeout(() => verificarDirigente(session.user), 300);
     }
   });
@@ -26,309 +64,300 @@ async function verificarDirigente(user) {
     .eq('id', user.id)
     .single();
 
-  if (error || perfil?.role !== 'manager') return;
+  if (error || !perfil || perfil.role !== 'manager') return;
 
   usuarioAtual = user;
-  abrirPainelDirigente(user, perfil);
+  abrirPainelDirigente(perfil);
 }
 
-async function abrirPainelDirigente(user, perfil) {
-  const painel = document.getElementById('login-box');
-  if (!painel) return;
+function abrirPainelDirigente(perfil) {
+  const loginBox = document.getElementById('login-box');
+  if (!loginBox) return;
 
-  painel.innerHTML = `
-    <div style="background:#080b09;color:white;padding:22px;border:1px solid #b5ff38;border-radius:14px;font-family:Arial,sans-serif">
+  loginBox.innerHTML = `
+    <div style="
+      background:#080b09;
+      color:#fff;
+      padding:22px;
+      border-radius:16px;
+      width:100%;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    ">
+      <div style="margin-bottom:25px;">
+        <div style="color:#b5ff38;font-size:12px;font-weight:bold;letter-spacing:2px;">
+          TORNEIO JR
+        </div>
+        <h2 style="margin:8px 0;color:#fff;">Área do dirigente</h2>
+        <p style="color:#aab3aa;">
+          Olá, ${escapar(perfil.full_name || 'Dirigente')}!
+        </p>
+      </div>
 
-      <h2 style="color:#b5ff38">ÁREA DO DIRIGENTE</h2>
-      <p>Olá, ${escapar(perfil.full_name || 'Dirigente')}!</p>
-
-      <h3 style="color:#b5ff38">Cadastrar minha equipe</h3>
-
-      <form id="form-equipe">
-        <label>Campeonato</label>
-        <select id="competicao-escolhida" required style="${estiloCampo()}">
-          <option value="">Carregando...</option>
-        </select>
+      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
+        <h3 style="color:#b5ff38;margin-top:0;">Cadastrar equipe</h3>
 
         <label>Nome da equipe</label>
-        <input id="nome-equipe" required maxlength="100"
-          placeholder="Nome da equipe" style="${estiloCampo()}">
+        <input id="nome-equipe" placeholder="Nome completo da equipe"
+          style="${estiloCampo()}">
 
-        <button type="submit" style="${estiloBotao()}">
-          ENVIAR INSCRIÇÃO
+        <label>Campeonato</label>
+        <select id="competicao-escolhida" style="${estiloCampo()}">
+          <option value="">Carregando campeonatos...</option>
+        </select>
+
+        <button id="botao-equipe" style="${estiloBotao()}">
+          CADASTRAR EQUIPE
         </button>
-      </form>
+        <p id="mensagem-equipe" style="font-size:13px;"></p>
+      </section>
 
-      <p id="mensagem-equipe"></p>
+      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
+        <h3 style="color:#b5ff38;margin-top:0;">Minhas equipes</h3>
+        <div id="minhas-equipes">Carregando equipes...</div>
+      </section>
 
-      <hr style="border-color:#333;margin:25px 0">
+      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
+        <h3 style="color:#b5ff38;margin-top:0;">Cadastrar atleta</h3>
 
-      <h3 style="color:#b5ff38">Minhas equipes</h3>
-
-      <div id="minhas-equipes">Carregando...</div>
-
-      <hr style="border-color:#333;margin:25px 0">
-
-      <h3 style="color:#b5ff38">Cadastrar atletas</h3>
-
-      <form id="form-atleta">
-        <label>Escolha a equipe</label>
-        <select id="equipe-atleta" required style="${estiloCampo()}">
-          <option value="">Carregando equipes...</option>
+        <label>Equipe do atleta</label>
+        <select id="equipe-atleta" style="${estiloCampo()}">
+          <option value="">Selecione uma equipe</option>
         </select>
 
-        <label>Nome completo do atleta</label>
-        <input id="nome-atleta" required maxlength="120"
-          placeholder="Nome do atleta" style="${estiloCampo()}">
+        <label>Nome completo</label>
+        <input id="nome-atleta" placeholder="Nome completo do atleta"
+          autocomplete="name" style="${estiloCampo()}">
 
-        <label>Número da camisa</label>
-        <input id="numero-atleta" type="number" min="0" max="99"
-          required placeholder="Ex.: 10" style="${estiloCampo()}">
+        <label>CPF</label>
+        <input id="cpf-atleta" placeholder="000.000.000-00"
+          inputmode="numeric" maxlength="14" style="${estiloCampo()}">
 
-        <label>Posição em campo</label>
-        <select id="posicao-atleta" required style="${estiloCampo()}">
-          <option value="">Selecione</option>
-          <option value="Goleiro">Goleiro</option>
-          <option value="Fixo">Fixo</option>
-          <option value="Ala">Ala</option>
-          <option value="Pivô">Pivô</option>
-          <option value="Outro">Outro</option>
-        </select>
+        <label>Data de nascimento</label>
+        <input id="nascimento-atleta" type="date"
+          style="${estiloCampo()}">
 
-        <button type="submit" style="${estiloBotao()}">
+        <label>WhatsApp</label>
+        <input id="whatsapp-atleta" placeholder="(31) 99999-9999"
+          type="tel" inputmode="tel" style="${estiloCampo()}">
+
+        <button id="botao-atleta" style="${estiloBotao()}">
           CADASTRAR ATLETA
         </button>
-      </form>
 
-      <p id="mensagem-atleta"></p>
+        <p id="mensagem-atleta" style="font-size:13px;"></p>
+      </section>
 
-      <h3 style="color:#b5ff38">Elenco da equipe</h3>
-      <div id="lista-atletas">Selecione uma equipe.</div>
+      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
+        <h3 style="color:#b5ff38;margin-top:0;">Atletas cadastrados</h3>
+        <div id="lista-atletas">Selecione uma equipe para visualizar os atletas.</div>
+      </section>
 
       <button id="sair-dirigente" style="
-        margin-top:25px;padding:12px;width:100%;
-        background:transparent;border:1px solid #777;
-        color:white;border-radius:8px">
-        SAIR DA CONTA
-      </button>
+        width:100%;padding:13px;border:1px solid #586258;
+        border-radius:9px;background:transparent;color:#fff;
+        font-weight:bold;cursor:pointer;
+      ">SAIR DA CONTA</button>
     </div>
   `;
 
+  document.getElementById('botao-equipe').onclick = cadastrarEquipe;
+  document.getElementById('botao-atleta').onclick = cadastrarAtleta;
+  document.getElementById('equipe-atleta').onchange = carregarAtletas;
   document.getElementById('sair-dirigente').onclick = async () => {
     await supabase.auth.signOut();
     location.reload();
   };
 
-  await carregarCompeticoes();
-  await carregarMinhasEquipes(user.id);
+  document.getElementById('cpf-atleta').addEventListener('input', evento => {
+    let valor = evento.target.value.replace(/\D/g, '').slice(0, 11);
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    evento.target.value = valor;
+  });
 
-  document.getElementById('form-equipe').onsubmit = cadastrarEquipe;
-  document.getElementById('form-atleta').onsubmit = cadastrarAtleta;
-
-  document.getElementById('equipe-atleta').onchange = (event) => {
-    carregarAtletas(event.target.value);
-  };
+  carregarCompeticoes();
+  carregarMinhasEquipes();
 }
 
 async function carregarCompeticoes() {
-  const select = document.getElementById('competicao-escolhida');
+  const campo = document.getElementById('competicao-escolhida');
 
   const { data, error } = await supabase
     .from('competitions')
-    .select('id, name, season, status')
+    .select('id, name')
     .in('status', ['Inscrições abertas', 'Open'])
     .order('created_at', { ascending: false });
 
   if (error) {
-    select.innerHTML = '<option value="">Erro ao carregar campeonatos</option>';
+    campo.innerHTML = '<option value="">Erro ao carregar campeonatos</option>';
     return;
   }
 
-  select.innerHTML = '<option value="">Selecione um campeonato</option>';
+  campo.innerHTML = '<option value="">Selecione um campeonato</option>';
 
-  (data || []).forEach(campeonato => {
-    const option = document.createElement('option');
-    option.value = campeonato.id;
-    option.textContent = campeonato.name +
-      (campeonato.season ? ' - ' + campeonato.season : '');
-    select.appendChild(option);
+  (data || []).forEach(competicao => {
+    campo.innerHTML += `
+      <option value="${escapar(competicao.id)}">
+        ${escapar(competicao.name)}
+      </option>
+    `;
   });
 }
 
-async function cadastrarEquipe(event) {
-  event.preventDefault();
-
-  const mensagem = document.getElementById('mensagem-equipe');
+async function cadastrarEquipe() {
   const nome = document.getElementById('nome-equipe').value.trim();
   const competicao = document.getElementById('competicao-escolhida').value;
+  const mensagem = document.getElementById('mensagem-equipe');
+  const botao = document.getElementById('botao-equipe');
 
-  mensagem.textContent = 'Enviando inscrição...';
+  if (!nome || !competicao) {
+    mensagem.textContent = 'Preencha o nome e selecione o campeonato.';
+    return;
+  }
+
+  botao.disabled = true;
+  mensagem.textContent = 'Cadastrando...';
 
   const { error } = await supabase.rpc('register_team', {
     p_name: nome,
     p_competition_id: competicao
   });
 
+  botao.disabled = false;
+
   if (error) {
-    mensagem.textContent = 'Erro: ' + error.message;
+    mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
     return;
   }
 
   mensagem.textContent = 'Equipe cadastrada! Aguardando aprovação.';
-  document.getElementById('form-equipe').reset();
-
-  await carregarMinhasEquipes(usuarioAtual.id);
+  document.getElementById('nome-equipe').value = '';
+  await carregarMinhasEquipes();
 }
 
-async function carregarMinhasEquipes(userId) {
-  const area = document.getElementById('minhas-equipes');
-  const select = document.getElementById('equipe-atleta');
+async function carregarMinhasEquipes() {
+  const lista = document.getElementById('minhas-equipes');
+  const seletor = document.getElementById('equipe-atleta');
 
   const { data, error } = await supabase
     .from('teams')
     .select('id, name, status')
-    .eq('owner_id', userId)
+    .eq('owner_id', usuarioAtual.id)
     .order('created_at', { ascending: false });
 
   if (error) {
-    area.textContent = 'Não foi possível carregar as equipes: ' + error.message;
-    select.innerHTML = '<option value="">Erro ao carregar</option>';
+    lista.textContent = 'Não foi possível carregar as equipes: ' + error.message;
     return;
   }
 
-  area.innerHTML = '';
-  select.innerHTML = '<option value="">Selecione sua equipe</option>';
+  equipesDoDirigente = data || [];
 
-  if (!data || data.length === 0) {
-    area.textContent = 'Você ainda não cadastrou uma equipe.';
-    return;
-  }
+  lista.innerHTML = equipesDoDirigente.length
+    ? equipesDoDirigente.map(equipe => `
+        <div style="padding:12px;border-bottom:1px solid #303a32;">
+          <strong>${escapar(equipe.name)}</strong>
+          <div style="color:#b5ff38;font-size:12px;margin-top:5px;">
+            ${escapar(equipe.status)}
+          </div>
+        </div>
+      `).join('')
+    : '<p style="color:#aaa;">Nenhuma equipe cadastrada ainda.</p>';
 
-  data.forEach(equipe => {
-    const item = document.createElement('div');
-    item.style.cssText = 'background:#151b15;padding:13px;margin-bottom:9px;border-radius:8px';
+  seletor.innerHTML = '<option value="">Selecione uma equipe</option>';
 
-    const nome = document.createElement('strong');
-    nome.textContent = equipe.name;
-
-    const status = document.createElement('p');
-    status.textContent = 'Inscrição: ' + equipe.status;
-
-    item.append(nome, status);
-    area.appendChild(item);
-
-    const option = document.createElement('option');
-    option.value = equipe.id;
-    option.textContent = equipe.name;
-    select.appendChild(option);
+  equipesDoDirigente.forEach(equipe => {
+    seletor.innerHTML += `
+      <option value="${escapar(equipe.id)}">
+        ${escapar(equipe.name)}
+      </option>
+    `;
   });
 }
 
-async function cadastrarAtleta(event) {
-  event.preventDefault();
-
-  const mensagem = document.getElementById('mensagem-atleta');
+async function cadastrarAtleta() {
   const equipe = document.getElementById('equipe-atleta').value;
   const nome = document.getElementById('nome-atleta').value.trim();
-  const numero = Number(document.getElementById('numero-atleta').value);
-  const posicao = document.getElementById('posicao-atleta').value;
+  const cpf = document.getElementById('cpf-atleta').value.replace(/\D/g, '');
+  const nascimento = document.getElementById('nascimento-atleta').value;
+  const whatsapp = document.getElementById('whatsapp-atleta').value.trim();
+  const mensagem = document.getElementById('mensagem-atleta');
+  const botao = document.getElementById('botao-atleta');
 
-  if (!equipe) {
-    mensagem.textContent = 'Selecione uma equipe.';
+  if (!equipe || !nome || !cpf || !nascimento || !whatsapp) {
+    mensagem.textContent = 'Preencha todos os campos.';
     return;
   }
 
+  if (cpf.length !== 11) {
+    mensagem.textContent = 'Digite um CPF com 11 números.';
+    return;
+  }
+
+  if (!equipesDoDirigente.some(item => item.id === equipe)) {
+    mensagem.textContent = 'Selecione uma equipe válida.';
+    return;
+  }
+
+  botao.disabled = true;
   mensagem.textContent = 'Cadastrando atleta...';
 
   const { error } = await supabase.rpc('register_player', {
     p_team_id: equipe,
     p_full_name: nome,
-    p_shirt_number: numero,
-    p_position: posicao
+    p_cpf: cpf,
+    p_birth_date: nascimento,
+    p_whatsapp: whatsapp
   });
 
+  botao.disabled = false;
+
   if (error) {
-    mensagem.textContent = 'Erro: ' + error.message;
+    mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
     return;
   }
 
   mensagem.textContent = 'Atleta cadastrado com sucesso!';
 
   document.getElementById('nome-atleta').value = '';
-  document.getElementById('numero-atleta').value = '';
-  document.getElementById('posicao-atleta').value = '';
+  document.getElementById('cpf-atleta').value = '';
+  document.getElementById('nascimento-atleta').value = '';
+  document.getElementById('whatsapp-atleta').value = '';
 
-  await carregarAtletas(equipe);
+  await carregarAtletas();
 }
 
-async function carregarAtletas(teamId) {
-  const area = document.getElementById('lista-atletas');
+async function carregarAtletas() {
+  const equipe = document.getElementById('equipe-atleta').value;
+  const lista = document.getElementById('lista-atletas');
 
-  if (!teamId) {
-    area.textContent = 'Selecione uma equipe.';
+  if (!equipe) {
+    lista.textContent = 'Selecione uma equipe para visualizar os atletas.';
     return;
   }
-
-  area.textContent = 'Carregando atletas...';
 
   const { data, error } = await supabase
     .from('players')
-    .select('id, full_name, shirt_number, position, status')
-    .eq('team_id', teamId)
-    .order('shirt_number', { ascending: true });
+    .select('id, full_name, status')
+    .eq('team_id', equipe)
+    .order('created_at', { ascending: false });
 
   if (error) {
-    area.textContent = 'Não foi possível carregar os atletas: ' + error.message;
+    lista.textContent = 'Não foi possível carregar os atletas: ' + error.message;
     return;
   }
 
-  area.innerHTML = '';
-
-  if (!data || data.length === 0) {
-    area.textContent = 'Nenhum atleta cadastrado nesta equipe.';
-    return;
-  }
-
-  data.forEach(atleta => {
-    const item = document.createElement('div');
-    item.style.cssText = 'background:#151b15;padding:13px;margin-bottom:8px;border-radius:8px';
-
-    const nome = document.createElement('strong');
-    nome.textContent = '#' + atleta.shirt_number + ' ' + atleta.full_name;
-
-    const detalhe = document.createElement('p');
-    detalhe.style.marginBottom = '0';
-    detalhe.textContent = (atleta.position || 'Sem posição') +
-      ' | Status: ' + atleta.status;
-
-    item.append(nome, detalhe);
-    area.appendChild(item);
-  });
+  lista.innerHTML = data && data.length
+    ? data.map(atleta => `
+        <div style="padding:12px;border-bottom:1px solid #303a32;">
+          <strong>${escapar(atleta.full_name)}</strong>
+          <div style="color:#b5ff38;font-size:12px;margin-top:5px;">
+            ${escapar(atleta.status)}
+          </div>
+        </div>
+      `).join('')
+    : '<p style="color:#aaa;">Nenhum atleta cadastrado nesta equipe.</p>';
 }
 
-function estiloCampo() {
-  return `
-    display:block;width:100%;box-sizing:border-box;
-    padding:13px;margin:8px 0 16px;
-    background:#151b15;color:white;
-    border:1px solid #444;border-radius:7px;
-  `;
-}
-
-function estiloBotao() {
-  return `
-    width:100%;padding:15px;background:#b5ff38;
-    color:#080b09;border:0;border-radius:8px;
-    font-weight:900;cursor:pointer;margin-top:10px;
-  `;
-}
-
-function escapar(valor) {
-  return String(valor).replace(/[&<>"']/g, caractere => ({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#039;'
-  })[caractere]);
-}
+iniciarPainelDirigente();
