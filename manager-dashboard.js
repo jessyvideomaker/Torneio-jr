@@ -250,6 +250,7 @@ async function abrirDetalhesEquipe(equipeId) {
     ?.addEventListener('click', carregarMinhasEquipes);
 }
 
+
 async function abrirCadastroEquipe() {
   const area = document.getElementById('minhas-equipes');
   if (!area) return;
@@ -277,6 +278,13 @@ async function abrirCadastroEquipe() {
       <form id="form-nova-equipe">
         <input id="nome-nova-equipe"
           placeholder="Nome da equipe" required>
+
+        <label for="escudo-nova-equipe">ESCUDO DA EQUIPE</label>
+        <input
+          id="escudo-nova-equipe"
+          type="file"
+          accept="image/png,image/jpeg,image/webp">
+
         <select id="campeonato-nova-equipe" required>
           <option value="">Selecione o campeonato</option>
           ${campeonatos.map(c => `
@@ -299,15 +307,69 @@ async function abrirCadastroEquipe() {
 
       const nome = document.getElementById('nome-nova-equipe').value.trim();
       const campeonato = document.getElementById('campeonato-nova-equipe').value;
+      const arquivo = document.getElementById('escudo-nova-equipe').files[0];
 
-      const { error } = await supabase.rpc('register_team', {
+      if (arquivo) {
+        const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp'];
+
+        if (!tiposPermitidos.includes(arquivo.type)) {
+          alert('Envie uma imagem PNG, JPG ou WEBP.');
+          return;
+        }
+
+        if (arquivo.size > 2 * 1024 * 1024) {
+          alert('O escudo deve ter no máximo 2 MB.');
+          return;
+        }
+      }
+
+      const { data: equipeId, error: erroCadastro } = await supabase.rpc('register_team', {
         p_name: nome,
         p_competition_id: campeonato
       });
 
-      if (error) {
-        alert('Erro ao cadastrar equipe: ' + error.message);
+      if (erroCadastro) {
+        alert('Erro ao cadastrar equipe: ' + erroCadastro.message);
         return;
+      }
+
+      if (arquivo) {
+        const extensao = arquivo.type === 'image/png'
+          ? 'png'
+          : arquivo.type === 'image/webp'
+            ? 'webp'
+            : 'jpg';
+
+        const caminho = `${equipeId}/escudo.${extensao}`;
+
+        const { error: erroUpload } = await supabase.storage
+          .from('escudos-times')
+          .upload(caminho, arquivo, {
+            contentType: arquivo.type,
+            upsert: true
+          });
+
+        if (erroUpload) {
+          alert('Equipe cadastrada, mas houve erro ao enviar o escudo: ' + erroUpload.message);
+          carregarMinhasEquipes();
+          return;
+        }
+
+        const { data: urlPublica } = supabase.storage
+          .from('escudos-times')
+          .getPublicUrl(caminho);
+
+        const { error: erroAtualizacao } = await supabase
+          .from('teams')
+          .update({ logo_url: urlPublica.publicUrl })
+          .eq('id', equipeId)
+          .eq('owner_id', usuarioAtual.id);
+
+        if (erroAtualizacao) {
+          alert('Equipe cadastrada, mas não foi possível salvar o escudo: ' + erroAtualizacao.message);
+          carregarMinhasEquipes();
+          return;
+        }
       }
 
       alert('Equipe enviada para aprovação!');
