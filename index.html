@@ -371,6 +371,9 @@ if (profile.role === 'manager' && profile.is_active === false) {
 if (selectedRole === 'admin') {
   loginMessage.textContent = '';
   abrirPainelAdmin(profile);
+} else if (selectedRole === 'manager') {
+  loginMessage.textContent = '';
+  iniciarPainelDirigente();
 } else {
   loginMessage.textContent = 'Login confirmado! A área deste perfil será liberada em breve.';
 }
@@ -382,7 +385,6 @@ if (selectedRole === 'admin') {
     loginSubmit.textContent = 'ENTRAR';
   }
 });
-
 try {
   const { data: times, error } = await supabase
     .from('teams')
