@@ -1,229 +1,295 @@
 
 import { supabase } from './supabase.js';
 
-(() => {
-  const estilo = `
-    <style>
-      #gestao-equipes {
-        margin-top: 18px;
-        padding: 18px;
-        background: #101510;
-        border: 1px solid #b5ff38;
-        border-radius: 12px;
-        color: white;
-      }
-      #gestao-equipes h2 {
-        color: #b5ff38;
-        font-size: 20px;
-      }
-      .equipe-admin {
-        background: #1a2119;
-        border: 1px solid #35432d;
-        border-radius: 10px;
-        padding: 14px;
-        margin: 12px 0;
-      }
-      .equipe-admin p {
-        margin: 7px 0;
-        overflow-wrap: anywhere;
-      }
-      .equipe-admin button {
-        padding: 10px 14px;
-        margin: 8px 6px 0 0;
-        border: 0;
-        border-radius: 7px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .aprovar-equipe {
-        background: #b5ff38;
-        color: #080b09;
-      }
-      .recusar-equipe {
-        background: #e34b4b;
-        color: white;
-      }
-      .excluir-equipe {
-        background: #8f2525;
-        color: white;
-      }
-      .status-equipe {
-        color: #b5ff38;
-        font-weight: bold;
-      }
-    </style>
-  `;
+const estilo = document.createElement('style');
+estilo.textContent = `
+#gestao-equipes {
+  color: #fff;
+  margin-top: 20px;
+}
+#gestao-equipes button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 4px;
+  font-weight: 800;
+}
+.btn-ver-equipe { background: #b5ff38; color: #080b09; }
+.btn-aprovar-equipe { background: #b5ff38; color: #080b09; }
+.btn-recusar-equipe { background: #555; color: #fff; }
+.btn-excluir-equipe { background: #c62828; color: #fff; }
+.equipe-admin-card {
+  background: #151a16;
+  border: 1px solid #303a30;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.equipe-admin-detalhes {
+  background: #0b100c;
+  border: 1px solid #354234;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.equipe-admin-detalhes h4 { color: #b5ff38; }
+.equipe-admin-detalhes p { margin: 7px 0; }
+`;
 
-  function escapar(valor) {
-    return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[caractere]);
+document.head.appendChild(estilo);
+
+const escapeHTML = (valor) => String(valor ?? '')
+  .replace(/[&<>"']/g, caractere => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[caractere]);
+
+async function carregarEquipes() {
+  const lista = document.getElementById('lista-equipes-admin');
+  if (!lista) return;
+
+  lista.innerHTML = '<p>Carregando equipes...</p>';
+
+  const { data, error } = await supabase.rpc('admin_list_teams');
+
+  if (error) {
+    lista.innerHTML = `<p>Erro ao carregar equipes: ${escapeHTML(error.message)}</p>`;
+    return;
   }
 
-  async function carregarEquipes() {
-    const lista = document.getElementById('lista-equipes-admin');
-    if (!lista) return;
+  if (!data || data.length === 0) {
+    lista.innerHTML = '<p>Nenhuma equipe cadastrada.</p>';
+    return;
+  }
 
-    lista.innerHTML = 'Carregando equipes...';
+  lista.innerHTML = data.map(equipe => {
+    const status = equipe.status || 'Não informado';
+    const pendente = status === 'pending';
 
-    const { data, error } = await supabase.rpc('admin_list_teams');
+    return `
+      <div class="equipe-admin-card">
+        <h3>${escapeHTML(equipe.name)}</h3>
+        <p><strong>Dirigente:</strong> ${escapeHTML(equipe.manager_name || 'Não informado')}</p>
+        <p><strong>Campeonato:</strong> ${escapeHTML(equipe.competition_name || 'Não informado')}</p>
+        <p><strong>Status:</strong> ${escapeHTML(status)}</p>
 
-    if (error) {
-      lista.innerHTML = 'Erro ao carregar equipes: ' + escapar(error.message);
-      return;
-    }
+        <button class="btn-ver-equipe"
+          data-ver-equipe="${escapeHTML(equipe.id)}">
+          VER EQUIPE
+        </button>
 
-    if (!data || data.length === 0) {
-      lista.innerHTML = 'Nenhuma equipe cadastrada até o momento.';
-      return;
-    }
-
-    lista.innerHTML = data.map(equipe => {
-      const status = {
-        pending: 'Pendente',
-        approved: 'Aprovada',
-        rejected: 'Recusada'
-      }[equipe.status] || equipe.status;
-
-      const botoes = equipe.status === 'pending'
-        ? `
-          <button class="aprovar-equipe" data-id="${escapar(equipe.id)}" data-status="approved">
+        ${pendente ? `
+          <button class="btn-aprovar-equipe"
+            data-aprovar-equipe="${escapeHTML(equipe.id)}">
             APROVAR
           </button>
-          <button class="recusar-equipe" data-id="${escapar(equipe.id)}" data-status="rejected">
+          <button class="btn-recusar-equipe"
+            data-recusar-equipe="${escapeHTML(equipe.id)}">
             RECUSAR
           </button>
-        `
-        : '';
+        ` : ''}
 
-      return `
-        <div class="equipe-admin">
-          <h3>${escapar(equipe.name)}</h3>
-          <p><strong>Dirigente:</strong> ${escapar(equipe.manager_name || 'Não informado')}</p>
-          <p><strong>Campeonato:</strong> ${escapar(equipe.competition_name || 'Não informado')}</p>
-          <p><strong>Status:</strong> <span class="status-equipe">${escapar(status)}</span></p>
-          ${botoes}
-          <button class="excluir-equipe" data-action="delete" data-id="${escapar(equipe.id)}">
-            EXCLUIR EQUIPE
-          </button>
-        </div>
-      `;
-    }).join('');
-  }
+        <button class="btn-excluir-equipe"
+          data-excluir-equipe="${escapeHTML(equipe.id)}"
+          data-nome-equipe="${escapeHTML(equipe.name)}">
+          EXCLUIR EQUIPE
+        </button>
 
-  async function atualizarStatus(id, status) {
-    const acao = status === 'approved' ? 'aprovar' : 'recusar';
-
-    if (!confirm(`Deseja realmente ${acao} esta equipe?`)) return;
-
-    const { error } = await supabase.rpc('admin_update_team_status', {
-      p_team_id: id,
-      p_status: status
-    });
-
-    if (error) {
-      alert('Não foi possível atualizar: ' + error.message);
-      return;
-    }
-
-    alert('Status da equipe atualizado com sucesso!');
-    carregarEquipes();
-  }
-
-  async function excluirEquipe(id, nome) {
-    const confirmou = confirm(
-      `ATENÇÃO!\n\nDeseja realmente excluir a equipe "${nome}"?\n\nOs atletas serão preservados, mas ficarão sem equipe vinculada. A comissão técnica e os grupos vinculados serão excluídos. Equipes com partidas não poderão ser excluídas.`
-    );
-
-    if (!confirmou) return;
-
-    const { error } = await supabase.rpc('admin_delete_team', {
-      p_team_id: id
-    });
-
-    if (error) {
-      alert('Não foi possível excluir a equipe:\n' + error.message);
-      return;
-    }
-
-    alert('Equipe excluída com sucesso!');
-    carregarEquipes();
-  }
-
-  function instalarPainel() {
-    const painel = document.getElementById('painel-admin');
-    if (!painel || document.getElementById('botao-gestao-equipes')) return;
-
-    painel.insertAdjacentHTML('beforeend', estilo);
-
-    const botao = document.createElement('button');
-    botao.id = 'botao-gestao-equipes';
-    botao.textContent = 'GESTÃO DE EQUIPES';
-    botao.style.cssText = `
-      display:block;
-      width:100%;
-      margin:15px 0;
-      padding:14px;
-      background:#b5ff38;
-      color:#080b09;
-      border:0;
-      border-radius:8px;
-      font-weight:900;
-      cursor:pointer;
+        <div id="detalhes-equipe-${escapeHTML(equipe.id)}"></div>
+      </div>
     `;
+  }).join('');
+}
 
-    const secao = document.createElement('section');
-    secao.id = 'gestao-equipes';
-    secao.style.display = 'none';
-    secao.innerHTML = `
-      <h2>GESTÃO DE EQUIPES</h2>
-      <p>Consulte, aprove, recuse ou exclua equipes inscritas.</p>
-      <button id="atualizar-lista-equipes" style="padding:10px;margin-bottom:12px;cursor:pointer;">
-        ATUALIZAR LISTA
-      </button>
-      <div id="lista-equipes-admin"></div>
+async function verEquipe(id) {
+  const area = document.getElementById(`detalhes-equipe-${id}`);
+  if (!area) return;
+
+  if (area.innerHTML.trim()) {
+    area.innerHTML = '';
+    return;
+  }
+
+  area.innerHTML = '<p>Carregando dados da equipe...</p>';
+
+  const [atletasResultado, comissaoResultado] = await Promise.all([
+    supabase
+      .from('players')
+      .select('full_name, shirt_number, position, status')
+      .eq('team_id', id)
+      .order('full_name'),
+
+    supabase
+      .from('team_staff')
+      .select('full_name, role')
+      .eq('team_id', id)
+      .order('created_at')
+  ]);
+
+  if (atletasResultado.error || comissaoResultado.error) {
+    area.innerHTML = `
+      <div class="equipe-admin-detalhes">
+        <p>Não foi possível carregar todos os dados.</p>
+        <p>${escapeHTML(
+          atletasResultado.error?.message ||
+          comissaoResultado.error?.message
+        )}</p>
+      </div>
     `;
+    return;
+  }
 
-    painel.appendChild(botao);
-    painel.appendChild(secao);
+  const atletas = atletasResultado.data || [];
+  const comissao = comissaoResultado.data || [];
 
-    botao.addEventListener('click', () => {
-      const aberta = secao.style.display !== 'none';
-      secao.style.display = aberta ? 'none' : 'block';
-
-      if (!aberta) carregarEquipes();
-    });
-
-    secao.querySelector('#atualizar-lista-equipes')
-      .addEventListener('click', carregarEquipes);
-
-    secao.addEventListener('click', event => {
-      const botaoAcao = event.target.closest('button[data-id]');
-      if (!botaoAcao) return;
-
-      const id = botaoAcao.dataset.id;
-
-      if (botaoAcao.dataset.action === 'delete') {
-        const equipe = botaoAcao.closest('.equipe-admin');
-        const nome = equipe.querySelector('h3')?.textContent || 'Equipe';
-
-        excluirEquipe(id, nome);
-        return;
+  area.innerHTML = `
+    <div class="equipe-admin-detalhes">
+      <h4>ATLETAS (${atletas.length})</h4>
+      ${
+        atletas.length
+          ? atletas.map(atleta => `
+            <p>
+              <strong>${escapeHTML(atleta.full_name)}</strong>
+              ${atleta.shirt_number != null
+                ? ` | Camisa ${escapeHTML(atleta.shirt_number)}`
+                : ''}
+              ${atleta.position
+                ? ` | ${escapeHTML(atleta.position)}`
+                : ''}
+              | ${escapeHTML(atleta.status)}
+            </p>
+          `).join('')
+          : '<p>Nenhum atleta cadastrado.</p>'
       }
 
-      atualizarStatus(id, botaoAcao.dataset.status);
-    });
-  }
+      <h4>COMISSÃO TÉCNICA (${comissao.length})</h4>
+      ${
+        comissao.length
+          ? comissao.map(integrante => `
+            <p>
+              <strong>${escapeHTML(integrante.full_name)}</strong>
+              | ${escapeHTML(integrante.role)}
+            </p>
+          `).join('')
+          : '<p>Nenhum integrante cadastrado.</p>'
+      }
+    </div>
+  `;
+}
 
-  const observador = new MutationObserver(instalarPainel);
-  observador.observe(document.body, {
-    childList: true,
-    subtree: true
+async function atualizarStatus(id, status) {
+  const mensagem = status === 'approved'
+    ? 'Deseja aprovar esta equipe?'
+    : 'Deseja recusar esta equipe?';
+
+  if (!confirm(mensagem)) return;
+
+  const { error } = await supabase.rpc('admin_update_team_status', {
+    p_team_id: id,
+    p_status: status
   });
 
-  instalarPainel();
-})();
+  if (error) {
+    alert('Erro: ' + error.message);
+    return;
+  }
+
+  alert('Cadastro atualizado com sucesso!');
+  carregarEquipes();
+}
+
+async function excluirEquipe(id, nome) {
+  const confirmou = confirm(
+    `Tem certeza que deseja excluir a equipe "${nome}"?\n\n` +
+    'Os atletas serão preservados, mas ficarão sem equipe. ' +
+    'A comissão técnica e os grupos vinculados serão excluídos. ' +
+    'Equipes com partidas vinculadas não podem ser excluídas.'
+  );
+
+  if (!confirmou) return;
+
+  const { error } = await supabase.rpc('admin_delete_team', {
+    p_team_id: id
+  });
+
+  if (error) {
+    alert('Não foi possível excluir: ' + error.message);
+    return;
+  }
+
+  alert('Equipe excluída com sucesso!');
+  carregarEquipes();
+}
+
+function instalarPainel() {
+  const painel = document.getElementById('painel-admin');
+  if (!painel) return;
+
+  if (document.getElementById('botao-gestao-equipes')) return;
+
+  const botao = document.createElement('button');
+  botao.id = 'botao-gestao-equipes';
+  botao.textContent = 'GESTÃO DE EQUIPES';
+  botao.style.cssText =
+    'background:#b5ff38;color:#080b09;padding:12px 18px;' +
+    'border:0;border-radius:8px;font-weight:900;cursor:pointer;';
+
+  const secao = document.createElement('section');
+  secao.id = 'gestao-equipes';
+  secao.style.display = 'none';
+  secao.innerHTML = `
+    <h2>GESTÃO DE EQUIPES</h2>
+    <button id="atualizar-lista-equipes"
+      style="background:#b5ff38;color:#080b09;">
+      ATUALIZAR LISTA
+    </button>
+    <div id="lista-equipes-admin"></div>
+  `;
+
+  painel.appendChild(botao);
+  painel.appendChild(secao);
+
+  botao.addEventListener('click', () => {
+    const aberta = secao.style.display !== 'none';
+    secao.style.display = aberta ? 'none' : 'block';
+    if (!aberta) carregarEquipes();
+  });
+
+  secao.querySelector('#atualizar-lista-equipes')
+    .addEventListener('click', carregarEquipes);
+}
+
+document.addEventListener('click', event => {
+  const alvo = event.target;
+
+  if (alvo.dataset.verEquipe) {
+    verEquipe(alvo.dataset.verEquipe);
+  }
+
+  if (alvo.dataset.aprovarEquipe) {
+    atualizarStatus(alvo.dataset.aprovarEquipe, 'approved');
+  }
+
+  if (alvo.dataset.recusarEquipe) {
+    atualizarStatus(alvo.dataset.recusarEquipe, 'rejected');
+  }
+
+  if (alvo.dataset.excluirEquipe) {
+    excluirEquipe(
+      alvo.dataset.excluirEquipe,
+      alvo.dataset.nomeEquipe
+    );
+  }
+});
+
+const observador = new MutationObserver(instalarPainel);
+observador.observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
+instalarPainel();
