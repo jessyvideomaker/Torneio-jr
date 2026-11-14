@@ -133,20 +133,15 @@ async function abrirPainelDirigente(user, perfil) {
 
     mensagem.textContent = 'Enviando inscrição...';
 
-    const { error } = await supabase
-      .from('teams')
-      .insert({
-        name: nome,
-        short_name: nome,
-        owner_id: user.id,
-        competition_id: competicao,
-        status: 'Pending'
-      });
+    const { data, error } = await supabase.rpc('register_team', {
+  p_name: nome,
+  p_competition_id: competicao
+});
 
-    if (error) {
-      mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
-      return;
-    }
+if (error) {
+  mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
+  return;
+}
 
     mensagem.textContent = 'Equipe cadastrada! Aguardando aprovação da organização.';
     document.getElementById('form-equipe').reset();
