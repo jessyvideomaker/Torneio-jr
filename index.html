@@ -366,7 +366,7 @@ loginForm.addEventListener('submit', async (event) => {
 
     loginMessage.textContent = 'Login confirmado! Sua conta foi autenticada. A próxima etapa será liberar o painel correspondente ao seu perfil.';
   } catch (error) {
-    mensagem.textContent = 'Erro: ' + error.message;
+    loginMessage.textContent = 'Não foi possível entrar. Confira seu e-mail e sua senha.';
     console.error('Erro no login:', error);
   } finally {
     loginSubmit.disabled = false;
