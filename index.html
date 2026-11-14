@@ -351,7 +351,11 @@ loginForm.addEventListener('submit', async (event) => {
       .single();
 
     if (profileError) throw profileError;
-
+if (profile.role === 'manager' && profile.is_active === false) {
+  await supabase.auth.signOut();
+  loginMessage.textContent = 'Seu acesso está bloqueado. Entre em contato com a organização do Torneio JR.';
+  return;
+}
     const roleNames = {
       admin: 'admin',
       manager: 'manager',
