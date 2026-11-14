@@ -446,14 +446,13 @@ function mostrarTelaNovaSenha() {
   };
 }
 
+
 function abrirPainelAdmin(profile) {
-  let painel = document.getElementById('painel-admin');
+  const antigo = document.getElementById('painel-admin');
+  if (antigo) antigo.remove();
 
-  if (painel) painel.remove();
-
-  painel = document.createElement('div');
+  const painel = document.createElement('div');
   painel.id = 'painel-admin';
-
   painel.style.cssText = `
     position:fixed;
     inset:0;
@@ -463,69 +462,227 @@ function abrirPainelAdmin(profile) {
     color:white;
     font-family:Arial,sans-serif;
     padding:24px;
+    box-sizing:border-box;
   `;
 
   painel.innerHTML = `
     <div style="max-width:1100px;margin:auto">
-      <div style="border-bottom:1px solid #29332c;padding-bottom:20px">
-        <h1 style="color:#39e75f;margin:0">TORNEIO JR</h1>
-        <p style="color:#aaa">PAINEL ADMINISTRATIVO</p>
-        <p>Bem-vinda, ${profile.full_name || 'Administradora'}!</p>
-      </div>
+      <header style="border-bottom:1px solid #29332c;padding-bottom:20px">
+        <h1 style="color:#b5ff38;margin:0">TORNEIO JR</h1>
+        <p style="color:#aaa">ALÉM DA VÁRZEA | PAINEL ADMINISTRATIVO</p>
+        <p id="admin-nome" style="margin-top:12px"></p>
+      </header>
 
-      <h2 style="margin-top:30px">Central de gerenciamento</h2>
-      <p style="color:#aaa">Escolha o que deseja administrar.</p>
+      <button id="admin-voltar" style="margin-top:20px;padding:10px 16px;background:#263129;color:white;border:1px solid #52634e;border-radius:5px">
+        ← VOLTAR AO PAINEL
+      </button>
 
-      <div id="admin-menu" style="
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-        gap:14px;
-        margin-top:25px;
-      ">
-        ${[
-          'Campeonatos',
-          'Equipes',
-          'Jogadores',
-          'Grupos e classificação',
-          'Jogos e resultados',
-          'Comunicados'
-        ].map(item => `
-          <button data-section="${item}" style="
-            padding:25px 15px;
-            background:#151b17;
-            border:1px solid #293b2e;
-            border-radius:10px;
-            color:white;
-            font-size:16px;
-            text-align:left;
-            cursor:pointer;
-          ">${item} <span style="color:#39e75f">→</span></button>
-        `).join('')}
-      </div>
+      <h2 style="margin-top:30px;color:#b5ff38">GERENCIAR CAMPEONAMENTOS</h2>
+      <p style="color:#aaa;margin:8px 0 22px">Cadastre e organize as competições do Torneio JR.</p>
 
-      <div id="admin-content" style="
-        margin-top:25px;
-        padding:22px;
-        background:#151b17;
-        border-radius:10px;
-      ">
-        <h3 style="color:#39e75f">Bem-vinda à administração!</h3>
-        <p style="color:#bbb">Selecione uma área acima para começar.</p>
-      </div>
+      <section style="background:#111713;border:1px solid #263129;border-radius:10px;padding:22px;margin-bottom:24px">
+        <h3 id="form-titulo" style="margin-bottom:18px">NOVO CAMPEONATO</h3>
+
+        <form id="competition-form">
+          <label style="display:block;margin:12px 0 6px;color:#b5ff38">NOME DO CAMPEONATO</label>
+          <input id="competition-name" required placeholder="Ex.: Torneio JR" style="width:100%;padding:14px;background:#080b09;border:1px solid #344b30;color:white;border-radius:5px">
+
+          <label style="display:block;margin:12px 0 6px;color:#b5ff38">TEMPORADA</label>
+          <input id="competition-season" required placeholder="Ex.: 2026" style="width:100%;padding:14px;background:#080b09;border:1px solid #344b30;color:white;border-radius:5px">
+
+          <label style="display:block;margin:12px 0 6px;color:#b5ff38">STATUS</label>
+          <select id="competition-status" style="width:100%;padding:14px;background:#080b09;border:1px solid #344b30;color:white;border-radius:5px">
+            <option value="Planejamento">Planejamento</option>
+            <option value="Inscrições abertas">Inscrições abertas</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Encerrado">Encerrado</option>
+          </select>
+
+          <label style="display:block;margin:12px 0 6px;color:#b5ff38">PRAZO DE INSCRIÇÃO</label>
+          <input id="competition-deadline" type="date" style="width:100%;padding:14px;background:#080b09;border:1px solid #344b30;color:white;border-radius:5px">
+
+          <button id="competition-save" type="submit" style="width:100%;margin-top:20px;padding:15px;background:#b5ff38;color:#080b09;border:0;border-radius:5px;font-weight:bold">
+            CADASTRAR CAMPEONATO
+          </button>
+
+          <button id="competition-cancel" type="button" style="display:none;width:100%;margin-top:10px;padding:12px;background:#263129;color:white;border:0;border-radius:5px">
+            CANCELAR EDIÇÃO
+          </button>
+        </form>
+
+        <p id="competition-message" style="margin-top:15px;color:#b5ff38;font-size:13px"></p>
+      </section>
+
+      <section>
+        <h3 style="margin-bottom:16px">CAMPEONATOS CADASTRADOS</h3>
+        <div id="competition-list">
+          <p style="color:#aaa">Carregando campeonatos...</p>
+        </div>
+      </section>
     </div>
   `;
 
   document.body.appendChild(painel);
 
-  painel.querySelectorAll('[data-section]').forEach(button => {
-    button.addEventListener('click', () => {
-      document.getElementById('admin-content').innerHTML = `
-        <h3 style="color:#39e75f">${button.dataset.section}</h3>
-        <p style="color:#bbb">Esta área será conectada ao banco de dados na próxima etapa.</p>
-      `;
-    });
+  const nome = painel.querySelector('#admin-nome');
+  nome.textContent = 'Bem-vinda, ' + (profile.full_name || 'Administradora') + '!';
+
+  painel.querySelector('#admin-voltar').addEventListener('click', () => {
+    abrirPainelAdmin(profile);
   });
+
+  const form = painel.querySelector('#competition-form');
+  const campoNome = painel.querySelector('#competition-name');
+  const campoSeason = painel.querySelector('#competition-season');
+  const campoStatus = painel.querySelector('#competition-status');
+  const campoDeadline = painel.querySelector('#competition-deadline');
+  const mensagem = painel.querySelector('#competition-message');
+  const lista = painel.querySelector('#competition-list');
+  const botaoSalvar = painel.querySelector('#competition-save');
+  const botaoCancelar = painel.querySelector('#competition-cancel');
+
+  let editingId = null;
+
+  function limparFormulario() {
+    editingId = null;
+    form.reset();
+    painel.querySelector('#form-titulo').textContent = 'NOVO CAMPEONATO';
+    botaoSalvar.textContent = 'CADASTRAR CAMPEONATO';
+    botaoCancelar.style.display = 'none';
+    mensagem.textContent = '';
+  }
+
+  botaoCancelar.addEventListener('click', limparFormulario);
+
+  async function carregarCampeonatos() {
+    lista.textContent = 'Carregando...';
+
+    const { data, error } = await supabase
+      .from('competitions')
+      .select('id, name, season, status, registration_deadline, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      lista.textContent = 'Erro ao carregar: ' + error.message;
+      return;
+    }
+
+    lista.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      lista.textContent = 'Nenhum campeonato cadastrado ainda.';
+      return;
+    }
+
+    data.forEach(campeonato => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#111713;border:1px solid #263129;border-radius:8px;padding:18px;margin-bottom:12px';
+
+      const titulo = document.createElement('h3');
+      titulo.style.color = '#b5ff38';
+      titulo.textContent = campeonato.name;
+
+      const temporada = document.createElement('p');
+      temporada.style.cssText = 'color:#ccc;margin-top:8px;font-size:13px';
+      temporada.textContent = 'Temporada: ' + campeonato.season;
+
+      const status = document.createElement('p');
+      status.style.cssText = 'color:#ccc;margin-top:6px;font-size:13px';
+      status.textContent = 'Status: ' + campeonato.status;
+
+      const prazo = document.createElement('p');
+      prazo.style.cssText = 'color:#aaa;margin-top:6px;font-size:13px';
+      prazo.textContent = 'Prazo de inscrição: ' + (campeonato.registration_deadline || 'Não definido');
+
+      const editar = document.createElement('button');
+      editar.textContent = 'EDITAR';
+      editar.style.cssText = 'padding:10px 16px;margin:15px 8px 0 0;background:#b5ff38;color:#080b09;border:0;border-radius:4px;font-weight:bold';
+
+      editar.addEventListener('click', () => {
+        editingId = campeonato.id;
+        campoNome.value = campeonato.name;
+        campoSeason.value = campeonato.season;
+        campoStatus.value = campeonato.status;
+        campoDeadline.value = campeonato.registration_deadline || '';
+        painel.querySelector('#form-titulo').textContent = 'EDITAR CAMPEONAMENTO';
+        botaoSalvar.textContent = 'SALVAR ALTERAÇÕES';
+        botaoCancelar.style.display = 'block';
+        mensagem.textContent = '';
+        form.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      const excluir = document.createElement('button');
+      excluir.textContent = 'EXCLUIR';
+      excluir.style.cssText = 'padding:10px 16px;margin-top:15px;background:#40201f;color:white;border:1px solid #a34b45;border-radius:4px;font-weight:bold';
+
+      excluir.addEventListener('click', async () => {
+        if (!confirm('Deseja realmente excluir este campeonato?')) return;
+
+        const { error } = await supabase
+          .from('competitions')
+          .delete()
+          .eq('id', campeonato.id);
+
+        if (error) {
+          alert('Erro ao excluir: ' + error.message);
+          return;
+        }
+
+        await carregarCampeonatos();
+      });
+
+      card.append(titulo, temporada, status, prazo, editar, excluir);
+      lista.appendChild(card);
+    });
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    botaoSalvar.disabled = true;
+    botaoSalvar.textContent = 'SALVANDO...';
+    mensagem.textContent = '';
+
+    const campeonato = {
+      name: campoNome.value.trim(),
+      season: campoSeason.value.trim(),
+      status: campoStatus.value,
+      registration_deadline: campoDeadline.value || null
+    };
+
+    let resultado;
+
+    if (editingId) {
+      resultado = await supabase
+        .from('competitions')
+        .update(campeonato)
+        .eq('id', editingId);
+    } else {
+      resultado = await supabase
+        .from('competitions')
+        .insert(campeonato);
+    }
+
+    botaoSalvar.disabled = false;
+    botaoSalvar.textContent = editingId ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR CAMPEONATO';
+
+    if (resultado.error) {
+      mensagem.textContent = 'Erro: ' + resultado.error.message;
+      return;
+    }
+
+    mensagem.textContent = editingId
+      ? 'Campeonato atualizado com sucesso!'
+      : 'Campeonato cadastrado com sucesso!';
+
+    limparFormulario();
+    mensagem.textContent = 'Campeonato salvo com sucesso!';
+    await carregarCampeonatos();
+  });
+
+  carregarCampeonatos();
 }
+
 </script>
 </body>
 </html>
