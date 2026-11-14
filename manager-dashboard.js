@@ -2,448 +2,366 @@
 import { supabase } from './supabase.js';
 
 let usuarioAtual = null;
-let equipesDoDirigente = [];
 
-function estiloCampo() {
-  return `
-    width:100%;box-sizing:border-box;padding:14px;
-    margin:7px 0 14px;border:1px solid #303a32;
-    border-radius:9px;background:#111713;color:#fff;
-    font-size:15px;
-  `;
+const estilo = document.createElement('style');
+estilo.textContent = `
+#painel-dirigente {
+  color: white;
+  margin-top: 20px;
 }
+.manager-card {
+  background: #151a16;
+  border: 1px solid #354234;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.manager-card h3 {
+  color: #b5ff38;
+}
+.manager-card button {
+  background: #b5ff38;
+  color: #080b09;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 15px;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.manager-status {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #303a30;
+  margin: 4px 0;
+}
+.manager-section {
+  margin-top: 18px;
+}
+.manager-section input,
+.manager-section select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 7px;
+  border: 1px solid #555;
+}
+`;
 
-function estiloBotao() {
-  return `
-    width:100%;padding:15px;border:0;border-radius:9px;
-    background:#b5ff38;color:#080b09;font-weight:800;
-    font-size:15px;cursor:pointer;margin-top:8px;
-  `;
-}
+document.head.appendChild(estilo);
 
 function escapar(valor) {
   return String(valor ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;',
-    '"': '&quot;', "'": '&#39;'
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
   })[c]);
 }
 
-function iniciarPainelDirigente() {
-  supabase.auth.getSession().then(({ data, error }) => {
-    if (!error && data.session) verificarDirigente(data.session.user);
-  });
-
-  supabase.auth.onAuthStateChange((evento, session) => {
-    if (evento === 'SIGNED_IN' && session) {
-      setTimeout(() => verificarDirigente(session.user), 300);
-    }
-  });
-}
-
-async function verificarDirigente(user) {
-  const { data: perfil, error } = await supabase
-    .from('profiles')
-    .select('role, full_name')
-    .eq('id', user.id)
-    .single();
-
-  if (error || !perfil || perfil.role !== 'manager') return;
-
-  usuarioAtual = user;
-  abrirPainelDirigente(perfil);
-}
-
-function abrirPainelDirigente(perfil) {
-  const loginBox = document.getElementById('login-box');
-  if (!loginBox) return;
-
-  loginBox.innerHTML = `
-    <div style="background:#080b09;color:#fff;padding:22px;
-      border-radius:16px;width:100%;box-sizing:border-box;font-family:Arial,sans-serif;">
-
-      <div style="margin-bottom:25px;">
-        <div style="color:#b5ff38;font-size:12px;font-weight:bold;letter-spacing:2px;">
-          TORNEIO JR
-        </div>
-        <h2 style="margin:8px 0;">Área do dirigente</h2>
-        <p style="color:#aab3aa;">Olá, ${escapar(perfil.full_name || 'Dirigente')}!</p>
-      </div>
-
-      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
-        <h3 style="color:#b5ff38;margin-top:0;">Cadastrar equipe</h3>
-        <label>Nome da equipe</label>
-        <input id="nome-equipe" placeholder="Nome completo da equipe" style="${estiloCampo()}">
-        <label>Campeonato</label>
-        <select id="competicao-escolhida" style="${estiloCampo()}">
-          <option value="">Carregando campeonatos...</option>
-        </select>
-        <button id="botao-equipe" style="${estiloBotao()}">CADASTRAR EQUIPE</button>
-        <p id="mensagem-equipe" style="font-size:13px;"></p>
-      </section>
-
-      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
-        <h3 style="color:#b5ff38;margin-top:0;">Minhas equipes</h3>
-        <div id="minhas-equipes">Carregando equipes...</div>
-      </section>
-
-      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
-        <h3 style="color:#b5ff38;margin-top:0;">Cadastrar atleta</h3>
-
-        <label>Equipe do atleta</label>
-        <select id="equipe-atleta" style="${estiloCampo()}">
-          <option value="">Selecione uma equipe</option>
-        </select>
-
-        <label>Nome completo</label>
-        <input id="nome-atleta" placeholder="Nome completo do atleta"
-          autocomplete="name" style="${estiloCampo()}">
-
-        <label>CPF</label>
-        <input id="cpf-atleta" placeholder="000.000.000-00"
-          inputmode="numeric" maxlength="14" style="${estiloCampo()}">
-
-        <label>Data de nascimento</label>
-        <input id="nascimento-atleta" type="date" style="${estiloCampo()}">
-
-        <label>WhatsApp</label>
-        <input id="whatsapp-atleta" placeholder="(31) 99999-9999"
-          type="tel" inputmode="tel" style="${estiloCampo()}">
-
-        <button id="botao-atleta" style="${estiloBotao()}">CADASTRAR ATLETA</button>
-        <p id="mensagem-atleta" style="font-size:13px;"></p>
-      </section>
-
-      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
-        <h3 style="color:#b5ff38;margin-top:0;">Atletas cadastrados</h3>
-        <div id="lista-atletas">Selecione uma equipe para visualizar os atletas.</div>
-      </section>
-
-      <section style="background:#111713;padding:17px;border-radius:12px;margin-bottom:20px;">
-        <h3 style="color:#b5ff38;margin-top:0;">Comissão técnica</h3>
-        <p style="color:#aaa;font-size:13px;">Cada equipe pode cadastrar até 3 integrantes.</p>
-
-        <label>Equipe</label>
-        <select id="equipe-comissao" style="${estiloCampo()}">
-          <option value="">Selecione uma equipe</option>
-        </select>
-
-        <label>Nome completo do integrante</label>
-        <input id="nome-comissao" placeholder="Nome completo" style="${estiloCampo()}">
-
-        <label>Função na comissão</label>
-        <select id="funcao-comissao" style="${estiloCampo()}">
-          <option value="">Selecione a função</option>
-          <option value="Treinador">Treinador</option>
-          <option value="Auxiliar técnico">Auxiliar técnico</option>
-          <option value="Preparador físico">Preparador físico</option>
-          <option value="Preparador de goleiros">Preparador de goleiros</option>
-          <option value="Fisioterapeuta">Fisioterapeuta</option>
-          <option value="Massagista">Massagista</option>
-          <option value="Outro">Outro</option>
-        </select>
-
-        <button id="botao-comissao" style="${estiloBotao()}">
-          CADASTRAR INTEGRANTE
-        </button>
-        <p id="mensagem-comissao" style="font-size:13px;"></p>
-
-        <div style="border-top:1px solid #303a32;margin-top:18px;padding-top:12px;">
-          <h4 style="color:#b5ff38;">Integrantes cadastrados</h4>
-          <div id="lista-comissao">Selecione uma equipe para visualizar.</div>
-        </div>
-      </section>
-
-      <button id="sair-dirigente" style="
-        width:100%;padding:13px;border:1px solid #586258;
-        border-radius:9px;background:transparent;color:#fff;
-        font-weight:bold;cursor:pointer;
-      ">SAIR DA CONTA</button>
-    </div>
-  `;
-
-  document.getElementById('botao-equipe').onclick = cadastrarEquipe;
-  document.getElementById('botao-atleta').onclick = cadastrarAtleta;
-  document.getElementById('botao-comissao').onclick = cadastrarIntegrante;
-
-  document.getElementById('equipe-atleta').onchange = carregarAtletas;
-  document.getElementById('equipe-comissao').onchange = carregarComissao;
-
-  document.getElementById('sair-dirigente').onclick = async () => {
-    await supabase.auth.signOut();
-    location.reload();
+function nomeStatus(status) {
+  const nomes = {
+    pending: 'Aguardando aprovação',
+    approved: 'Aprovado',
+    rejected: 'Recusado'
   };
 
-  document.getElementById('cpf-atleta').addEventListener('input', evento => {
-    let valor = evento.target.value.replace(/\D/g, '').slice(0, 11);
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    evento.target.value = valor;
-  });
-
-  carregarCompeticoes();
-  carregarMinhasEquipes();
+  return nomes[status] || status || 'Não informado';
 }
 
-async function carregarCompeticoes() {
-  const campo = document.getElementById('competicao-escolhida');
+async function obterUsuario() {
+  const { data, error } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase
-    .from('competitions')
-    .select('id, name')
-    .in('status', ['Inscrições abertas', 'Open'])
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    campo.innerHTML = '<option value="">Erro ao carregar campeonatos</option>';
-    return;
+  if (error || !data.user) {
+    return null;
   }
 
-  campo.innerHTML = '<option value="">Selecione um campeonato</option>';
-
-  (data || []).forEach(competicao => {
-    campo.innerHTML += `
-      <option value="${escapar(competicao.id)}">${escapar(competicao.name)}</option>
-    `;
-  });
+  return data.user;
 }
 
-async function cadastrarEquipe() {
-  const nome = document.getElementById('nome-equipe').value.trim();
-  const competicao = document.getElementById('competicao-escolhida').value;
-  const mensagem = document.getElementById('mensagem-equipe');
-  const botao = document.getElementById('botao-equipe');
+async function carregarPainel() {
+  const painel = document.getElementById('painel-dirigente');
+  if (!painel || !usuarioAtual) return;
 
-  if (!nome || !competicao) {
-    mensagem.textContent = 'Preencha o nome e selecione o campeonato.';
-    return;
-  }
+  painel.innerHTML = `
+    <h2>ÁREA DO DIRIGENTE</h2>
+    <p>Bem-vindo à gestão da sua equipe.</p>
+    <div id="minhas-equipes"></div>
+  `;
 
-  botao.disabled = true;
-  mensagem.textContent = 'Cadastrando...';
-
-  const { error } = await supabase.rpc('register_team', {
-    p_name: nome,
-    p_competition_id: competicao
-  });
-
-  botao.disabled = false;
-
-  if (error) {
-    mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
-    return;
-  }
-
-  mensagem.textContent = 'Equipe cadastrada! Aguardando aprovação.';
-  document.getElementById('nome-equipe').value = '';
   await carregarMinhasEquipes();
 }
 
 async function carregarMinhasEquipes() {
-  const lista = document.getElementById('minhas-equipes');
-  const seletorAtleta = document.getElementById('equipe-atleta');
-  const seletorComissao = document.getElementById('equipe-comissao');
+  const area = document.getElementById('minhas-equipes');
+  if (!area) return;
 
-  const { data, error } = await supabase
+  area.innerHTML = '<p>Carregando suas equipes...</p>';
+
+  const { data: equipes, error } = await supabase
     .from('teams')
-    .select('id, name, status')
+    .select('id, name, status, competition_id')
     .eq('owner_id', usuarioAtual.id)
     .order('created_at', { ascending: false });
 
   if (error) {
-    lista.textContent = 'Não foi possível carregar as equipes: ' + error.message;
+    area.innerHTML = `<p>Erro: ${escapar(error.message)}</p>`;
     return;
   }
 
-  equipesDoDirigente = data || [];
+  if (!equipes || equipes.length === 0) {
+    area.innerHTML = `
+      <div class="manager-card">
+        <h3>Nenhuma equipe cadastrada</h3>
+        <p>Cadastre sua equipe para começar.</p>
+        <button id="btn-abrir-cadastro-equipe">CADASTRAR EQUIPE</button>
+      </div>
+    `;
+    document.getElementById('btn-abrir-cadastro-equipe')
+      ?.addEventListener('click', abrirCadastroEquipe);
+    return;
+  }
 
-  lista.innerHTML = equipesDoDirigente.length
-    ? equipesDoDirigente.map(equipe => `
-        <div style="padding:12px;border-bottom:1px solid #303a32;">
-          <strong>${escapar(equipe.name)}</strong>
-          <div style="color:#b5ff38;font-size:12px;margin-top:5px;">
-            ${escapar(equipe.status)}
-          </div>
+  area.innerHTML = `
+    <div class="manager-card">
+      <h3>MINHAS EQUIPES</h3>
+      ${equipes.map(equipe => `
+        <div class="manager-card">
+          <h3>${escapar(equipe.name)}</h3>
+          <p>Status:
+            <span class="manager-status">
+              ${escapar(nomeStatus(equipe.status))}
+            </span>
+          </p>
+          <button data-ver-minha-equipe="${escapar(equipe.id)}">
+            ACOMPANHAR EQUIPE
+          </button>
         </div>
-      `).join('')
-    : '<p style="color:#aaa;">Nenhuma equipe cadastrada ainda.</p>';
+      `).join('')}
+      <button id="btn-abrir-cadastro-equipe">CADASTRAR OUTRA EQUIPE</button>
+    </div>
+  `;
 
-  const opcoes = '<option value="">Selecione uma equipe</option>' +
-    equipesDoDirigente.map(equipe => `
-      <option value="${escapar(equipe.id)}">${escapar(equipe.name)}</option>
-    `).join('');
+  document.getElementById('btn-abrir-cadastro-equipe')
+    ?.addEventListener('click', abrirCadastroEquipe);
 
-  seletorAtleta.innerHTML = opcoes;
-  seletorComissao.innerHTML = opcoes;
-}
-
-async function cadastrarAtleta() {
-  const equipe = document.getElementById('equipe-atleta').value;
-  const nome = document.getElementById('nome-atleta').value.trim();
-  const cpf = document.getElementById('cpf-atleta').value.replace(/\D/g, '');
-  const nascimento = document.getElementById('nascimento-atleta').value;
-  const whatsapp = document.getElementById('whatsapp-atleta').value.trim();
-  const mensagem = document.getElementById('mensagem-atleta');
-  const botao = document.getElementById('botao-atleta');
-
-  if (!equipe || !nome || !cpf || !nascimento || !whatsapp) {
-    mensagem.textContent = 'Preencha todos os campos.';
-    return;
-  }
-
-  if (cpf.length !== 11) {
-    mensagem.textContent = 'Digite um CPF com 11 números.';
-    return;
-  }
-
-  if (!equipesDoDirigente.some(item => item.id === equipe)) {
-    mensagem.textContent = 'Selecione uma equipe válida.';
-    return;
-  }
-
-  botao.disabled = true;
-  mensagem.textContent = 'Cadastrando atleta...';
-
-  const { error } = await supabase.rpc('register_player', {
-    p_team_id: equipe,
-    p_full_name: nome,
-    p_cpf: cpf,
-    p_birth_date: nascimento,
-    p_whatsapp: whatsapp
+  area.querySelectorAll('[data-ver-minha-equipe]').forEach(botao => {
+    botao.addEventListener('click', () => {
+      abrirDetalhesEquipe(botao.dataset.verMinhaEquipe);
+    });
   });
-
-  botao.disabled = false;
-
-  if (error) {
-    mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
-    return;
-  }
-
-  mensagem.textContent = 'Atleta cadastrado com sucesso!';
-  document.getElementById('nome-atleta').value = '';
-  document.getElementById('cpf-atleta').value = '';
-  document.getElementById('nascimento-atleta').value = '';
-  document.getElementById('whatsapp-atleta').value = '';
-
-  await carregarAtletas();
 }
 
-async function carregarAtletas() {
-  const equipe = document.getElementById('equipe-atleta').value;
-  const lista = document.getElementById('lista-atletas');
+async function abrirDetalhesEquipe(equipeId) {
+  const area = document.getElementById('minhas-equipes');
+  if (!area) return;
 
-  if (!equipe) {
-    lista.textContent = 'Selecione uma equipe para visualizar os atletas.';
+  area.innerHTML = '<p>Carregando informações...</p>';
+
+  const { data: equipe, error } = await supabase
+    .from('teams')
+    .select('id, name, status')
+    .eq('id', equipeId)
+    .eq('owner_id', usuarioAtual.id)
+    .single();
+
+  if (error || !equipe) {
+    area.innerHTML = '<p>Não foi possível localizar sua equipe.</p>';
     return;
   }
 
-  const { data, error } = await supabase
-    .from('players')
-    .select('id, full_name, status')
-    .eq('team_id', equipe)
-    .order('created_at', { ascending: false });
+  const [atletasResultado, comissaoResultado] = await Promise.all([
+    supabase
+      .from('players')
+      .select('id, full_name, shirt_number, position, status')
+      .eq('team_id', equipeId)
+      .order('full_name'),
 
-  if (error) {
-    lista.textContent = 'Não foi possível carregar os atletas: ' + error.message;
+    supabase
+      .from('team_staff')
+      .select('id, full_name, role')
+      .eq('team_id', equipeId)
+      .order('created_at')
+  ]);
+
+  if (atletasResultado.error || comissaoResultado.error) {
+    area.innerHTML = `
+      <p>Erro ao carregar os dados:
+      ${escapar(atletasResultado.error?.message ||
+        comissaoResultado.error?.message)}</p>
+    `;
     return;
   }
 
-  lista.innerHTML = data && data.length
-    ? data.map(atleta => `
-        <div style="padding:12px;border-bottom:1px solid #303a32;">
-          <strong>${escapar(atleta.full_name)}</strong>
-          <div style="color:#b5ff38;font-size:12px;margin-top:5px;">
-            ${escapar(atleta.status)}
-          </div>
-        </div>
-      `).join('')
-    : '<p style="color:#aaa;">Nenhum atleta cadastrado nesta equipe.</p>';
+  const atletas = atletasResultado.data || [];
+  const comissao = comissaoResultado.data || [];
+
+  area.innerHTML = `
+    <div class="manager-card">
+      <button id="voltar-equipes">VOLTAR</button>
+      <h2>${escapar(equipe.name)}</h2>
+      <p>Status da equipe:
+        <span class="manager-status">
+          ${escapar(nomeStatus(equipe.status))}
+        </span>
+      </p>
+
+      <div class="manager-section">
+        <h3>ATLETAS (${atletas.length})</h3>
+        ${
+          atletas.length
+            ? atletas.map(atleta => `
+              <div class="manager-card">
+                <strong>${escapar(atleta.full_name)}</strong>
+                <p>Camisa: ${escapar(atleta.shirt_number || 'Não informada')}</p>
+                <p>Posição: ${escapar(atleta.position || 'Não informada')}</p>
+                <p>Status:
+                  <span class="manager-status">
+                    ${escapar(nomeStatus(atleta.status))}
+                  </span>
+                </p>
+              </div>
+            `).join('')
+            : '<p>Nenhum atleta cadastrado.</p>'
+        }
+      </div>
+
+      <div class="manager-section">
+        <h3>COMISSÃO TÉCNICA (${comissao.length}/3)</h3>
+        ${
+          comissao.length
+            ? comissao.map(pessoa => `
+              <div class="manager-card">
+                <strong>${escapar(pessoa.full_name)}</strong>
+                <p>${escapar(pessoa.role)}</p>
+              </div>
+            `).join('')
+            : '<p>Nenhum integrante cadastrado.</p>'
+        }
+      </div>
+    </div>
+  `;
+
+  document.getElementById('voltar-equipes')
+    ?.addEventListener('click', carregarMinhasEquipes);
 }
 
-async function cadastrarIntegrante() {
-  const equipe = document.getElementById('equipe-comissao').value;
-  const nome = document.getElementById('nome-comissao').value.trim();
-  const funcao = document.getElementById('funcao-comissao').value;
-  const mensagem = document.getElementById('mensagem-comissao');
-  const botao = document.getElementById('botao-comissao');
+async function abrirCadastroEquipe() {
+  const area = document.getElementById('minhas-equipes');
+  if (!area) return;
 
-  if (!equipe || !nome || !funcao) {
-    mensagem.textContent = 'Selecione a equipe e preencha o nome e a função.';
-    return;
-  }
-
-  if (!equipesDoDirigente.some(item => item.id === equipe)) {
-    mensagem.textContent = 'Selecione uma equipe válida.';
-    return;
-  }
-
-  botao.disabled = true;
-  mensagem.textContent = 'Cadastrando integrante...';
-
-  const { error } = await supabase.rpc('register_team_staff', {
-    p_team_id: equipe,
-    p_full_name: nome,
-    p_role: funcao
-  });
-
-  botao.disabled = false;
+  const { data: campeonatos, error } = await supabase
+    .from('competitions')
+    .select('id, name, season')
+    .in('status', ['Open', 'Planejamento', 'Inscrições abertas'])
+    .order('name');
 
   if (error) {
-    mensagem.textContent = 'Não foi possível cadastrar: ' + error.message;
+    alert('Erro ao carregar campeonatos: ' + error.message);
     return;
   }
 
-  mensagem.textContent = 'Integrante cadastrado com sucesso!';
-  document.getElementById('nome-comissao').value = '';
-  document.getElementById('funcao-comissao').value = '';
+  if (!campeonatos || campeonatos.length === 0) {
+    alert('Não existem campeonatos disponíveis para inscrição.');
+    return;
+  }
 
-  await carregarComissao();
+  area.innerHTML = `
+    <div class="manager-card">
+      <button id="voltar-equipes">VOLTAR</button>
+      <h3>CADASTRAR EQUIPE</h3>
+      <form id="form-nova-equipe">
+        <input id="nome-nova-equipe"
+          placeholder="Nome da equipe" required>
+        <select id="campeonato-nova-equipe" required>
+          <option value="">Selecione o campeonato</option>
+          ${campeonatos.map(c => `
+            <option value="${escapar(c.id)}">
+              ${escapar(c.name)} ${escapar(c.season || '')}
+            </option>
+          `).join('')}
+        </select>
+        <button type="submit">ENVIAR CADASTRO</button>
+      </form>
+    </div>
+  `;
+
+  document.getElementById('voltar-equipes')
+    ?.addEventListener('click', carregarMinhasEquipes);
+
+  document.getElementById('form-nova-equipe')
+    .addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const nome = document.getElementById('nome-nova-equipe').value.trim();
+      const campeonato = document.getElementById('campeonato-nova-equipe').value;
+
+      const { error } = await supabase.rpc('register_team', {
+        p_name: nome,
+        p_competition_id: campeonato
+      });
+
+      if (error) {
+        alert('Erro ao cadastrar equipe: ' + error.message);
+        return;
+      }
+
+      alert('Equipe enviada para aprovação!');
+      carregarMinhasEquipes();
+    });
 }
 
-async function carregarComissao() {
-  const equipe = document.getElementById('equipe-comissao').value;
-  const lista = document.getElementById('lista-comissao');
-  const botao = document.getElementById('botao-comissao');
+async function instalarPainelDirigente() {
+  usuarioAtual = await obterUsuario();
+  if (!usuarioAtual) return;
 
-  if (!equipe) {
-    lista.textContent = 'Selecione uma equipe para visualizar.';
-    botao.disabled = false;
-    return;
-  }
+  const { data: perfil, error } = await supabase
+    .from('profiles')
+    .select('role, full_name, is_active')
+    .eq('id', usuarioAtual.id)
+    .single();
 
-  const { data, error } = await supabase
-    .from('team_staff')
-    .select('id, full_name, role')
-    .eq('team_id', equipe)
-    .order('created_at', { ascending: true });
+  if (error || !perfil || perfil.role !== 'manager' ||
+      perfil.is_active === false) return;
 
-  if (error) {
-    lista.textContent = 'Não foi possível carregar a comissão: ' + error.message;
-    return;
-  }
+  if (document.getElementById('painel-dirigente')) return;
 
-  const integrantes = data || [];
+  const painel = document.createElement('section');
+  painel.id = 'painel-dirigente';
+  painel.style.cssText = `
+    background:#080b09;
+    border:1px solid #354234;
+    border-radius:14px;
+    padding:20px;
+    margin:20px 0;
+    color:white;
+  `;
 
-  lista.innerHTML = integrantes.length
-    ? integrantes.map((integrante, indice) => `
-        <div style="padding:12px;border-bottom:1px solid #303a32;">
-          <strong>${indice + 1}. ${escapar(integrante.full_name)}</strong>
-          <div style="color:#b5ff38;font-size:13px;margin-top:5px;">
-            ${escapar(integrante.role)}
-          </div>
-        </div>
-      `).join('')
-    : '<p style="color:#aaa;">Nenhum integrante cadastrado.</p>';
+  const login = document.getElementById('login-box') ||
+    document.getElementById('login-form');
 
-  botao.disabled = integrantes.length >= 3;
-
-  if (integrantes.length >= 3) {
-    document.getElementById('mensagem-comissao').textContent =
-      'Limite de 3 integrantes atingido para esta equipe.';
+  if (login) {
+    login.insertAdjacentElement('afterend', painel);
   } else {
-    document.getElementById('mensagem-comissao').textContent =
-      `${integrantes.length} de 3 integrantes cadastrados.`;
+    document.body.appendChild(painel);
   }
+
+  await carregarPainel();
 }
 
-iniciarPainelDirigente();
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    setTimeout(instalarPainelDirigente, 0);
+  }
+
+  if (event === 'SIGNED_OUT') {
+    usuarioAtual = null;
+    document.getElementById('painel-dirigente')?.remove();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', instalarPainelDirigente);
