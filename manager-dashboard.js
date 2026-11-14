@@ -140,7 +140,7 @@ async function abrirPainelDirigente(user, perfil) {
         short_name: nome,
         owner_id: user.id,
         competition_id: competicao,
-        status: 'Pendente'
+        status: 'Pending'
       });
 
     if (error) {
