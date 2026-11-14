@@ -389,6 +389,56 @@ try {
 } catch (error) {
   console.error('Falha na conexão com Supabase:', error);
 }
-</script>
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    mostrarTelaNovaSenha();
+  }
+});
+
+function mostrarTelaNovaSenha() {
+  if (document.getElementById('recovery-box')) return;
+
+  const box = document.createElement('div');
+  box.id = 'recovery-box';
+  box.style.cssText = 'position:fixed;inset:0;background:#080b09;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;color:white;font-family:Arial';
+
+  box.innerHTML = `
+    <div style="background:#151b17;padding:28px;border-radius:14px;width:100%;max-width:400px">
+      <h2 style="color:#39e75f">Nova senha</h2>
+      <p>Cadastre sua nova senha de administradora.</p>
+      <input id="nova-senha" type="password" placeholder="Nova senha" style="width:100%;padding:14px;margin:10px 0">
+      <input id="confirma-senha" type="password" placeholder="Confirme a nova senha" style="width:100%;padding:14px;margin:10px 0">
+      <button id="salvar-senha" style="width:100%;padding:14px;background:#39e75f;color:#071009;border:0;font-weight:bold">SALVAR NOVA SENHA</button>
+      <p id="recovery-msg"></p>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+
+  document.getElementById('salvar-senha').onclick = async () => {
+    const senha = document.getElementById('nova-senha').value;
+    const confirma = document.getElementById('confirma-senha').value;
+    const msg = document.getElementById('recovery-msg');
+
+    if (senha.length < 6) {
+      msg.textContent = 'Use pelo menos 6 caracteres.';
+      return;
+    }
+
+    if (senha !== confirma) {
+      msg.textContent = 'As senhas não conferem.';
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: senha });
+
+    if (error) {
+      msg.textContent = error.message;
+      return;
+    }
+
+    msg.textContent = 'Senha alterada com sucesso! Você já pode entrar.';
+  };
+}</script>
 </body>
 </html>
