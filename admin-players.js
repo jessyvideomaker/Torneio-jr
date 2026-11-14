@@ -34,11 +34,13 @@ function criarGestaoAtletas() {
 
   area.innerHTML = `
     <h2 style="color:#b5ff38;">Gestão de atletas</h2>
-    <p style="color:#aaa;">Consulte os cadastros e aprove ou reprove os atletas.</p>
+    <p style="color:#aaa;">Consulte os cadastros e gerencie as aprovações.</p>
+
     <button id="atualizar-lista-atletas" style="
       padding:12px;background:#b5ff38;color:#080b09;
       border:0;border-radius:8px;font-weight:bold;cursor:pointer;
     ">ATUALIZAR LISTA</button>
+
     <div id="resultado-atletas-admin" style="margin-top:18px;">
       Toque em atualizar lista.
     </div>
@@ -80,8 +82,8 @@ function criarGestaoAtletas() {
       return;
     }
 
-    alert('Cadastro atualizado com sucesso!');
     await carregarAtletasAdmin();
+    alert('Cadastro atualizado com sucesso!');
   });
 }
 
@@ -113,22 +115,11 @@ async function carregarAtletasAdmin() {
       rejected: 'Reprovado'
     }[atleta.status] || atleta.status;
 
-    return `
-      <article style="
-        background:#080b09;padding:15px;margin-bottom:14px;
-        border:1px solid #303a32;border-radius:10px;
-      ">
-        <h3 style="color:#b5ff38;margin-top:0;">
-          ${escapar(atleta.full_name)}
-        </h3>
+    let botoes = '';
 
-        <p><strong>Equipe:</strong> ${escapar(atleta.team_name || 'Não informada')}</p>
-        <p><strong>CPF:</strong> ${escapar(atleta.cpf || 'Não informado')}</p>
-        <p><strong>Nascimento:</strong> ${escapar(nascimento)}</p>
-        <p><strong>WhatsApp:</strong> ${escapar(atleta.whatsapp || 'Não informado')}</p>
-        <p><strong>Status:</strong> ${escapar(status)}</p>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    if (atleta.status === 'pending') {
+      botoes = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
           <button data-id="${escapar(atleta.player_id)}"
             data-status="approved"
             style="padding:11px;background:#b5ff38;color:#080b09;
@@ -143,6 +134,31 @@ async function carregarAtletasAdmin() {
             REPROVAR
           </button>
         </div>
+      `;
+    }
+
+    return `
+      <article style="
+        background:#080b09;padding:15px;margin-bottom:14px;
+        border:1px solid #303a32;border-radius:10px;
+      ">
+        <h3 style="color:#b5ff38;margin-top:0;">
+          ${escapar(atleta.full_name)}
+        </h3>
+
+        <p><strong>Equipe:</strong> ${escapar(atleta.team_name || 'Não informada')}</p>
+        <p><strong>CPF:</strong> ${escapar(atleta.cpf || 'Não informado')}</p>
+        <p><strong>Nascimento:</strong> ${escapar(nascimento)}</p>
+        <p><strong>WhatsApp:</strong> ${escapar(atleta.whatsapp || 'Não informado')}</p>
+
+        <p style="font-weight:bold;color:${
+          atleta.status === 'approved' ? '#b5ff38' :
+          atleta.status === 'rejected' ? '#ff7777' : '#f5cf62'
+        };">
+          STATUS: ${escapar(status)}
+        </p>
+
+        ${botoes}
       </article>
     `;
   }).join('');
