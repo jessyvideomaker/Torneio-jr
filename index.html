@@ -364,7 +364,12 @@ loginForm.addEventListener('submit', async (event) => {
       return;
     }
 
-    loginMessage.textContent = 'Login confirmado! Sua conta foi autenticada. A próxima etapa será liberar o painel correspondente ao seu perfil.';
+if (selectedRole === 'admin') {
+  loginMessage.textContent = '';
+  abrirPainelAdmin(profile);
+} else {
+  loginMessage.textContent = 'Login confirmado! A área deste perfil será liberada em breve.';
+}
   } catch (error) {
     loginMessage.textContent = 'Erro: ' + error.message;
     console.error('Erro no login:', error);
@@ -439,6 +444,86 @@ function mostrarTelaNovaSenha() {
 
     msg.textContent = 'Senha alterada com sucesso! Você já pode entrar.';
   };
+function abrirPainelAdmin(profile) {
+  let painel = document.getElementById('painel-admin');
+
+  if (painel) painel.remove();
+
+  painel = document.createElement('div');
+  painel.id = 'painel-admin';
+
+  painel.style.cssText = `
+    position:fixed;
+    inset:0;
+    z-index:99998;
+    overflow-y:auto;
+    background:#080b09;
+    color:white;
+    font-family:Arial,sans-serif;
+    padding:24px;
+  `;
+
+  painel.innerHTML = `
+    <div style="max-width:1100px;margin:auto">
+      <div style="border-bottom:1px solid #29332c;padding-bottom:20px">
+        <h1 style="color:#39e75f;margin:0">TORNEIO JR</h1>
+        <p style="color:#aaa">PAINEL ADMINISTRATIVO</p>
+        <p>Bem-vinda, ${profile.full_name || 'Administradora'}!</p>
+      </div>
+
+      <h2 style="margin-top:30px">Central de gerenciamento</h2>
+      <p style="color:#aaa">Escolha o que deseja administrar.</p>
+
+      <div id="admin-menu" style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:14px;
+        margin-top:25px;
+      ">
+        ${[
+          'Campeonatos',
+          'Equipes',
+          'Jogadores',
+          'Grupos e classificação',
+          'Jogos e resultados',
+          'Comunicados'
+        ].map(item => `
+          <button data-section="${item}" style="
+            padding:25px 15px;
+            background:#151b17;
+            border:1px solid #293b2e;
+            border-radius:10px;
+            color:white;
+            font-size:16px;
+            text-align:left;
+            cursor:pointer;
+          ">${item} <span style="color:#39e75f">→</span></button>
+        `).join('')}
+      </div>
+
+      <div id="admin-content" style="
+        margin-top:25px;
+        padding:22px;
+        background:#151b17;
+        border-radius:10px;
+      ">
+        <h3 style="color:#39e75f">Bem-vinda à administração!</h3>
+        <p style="color:#bbb">Selecione uma área acima para começar.</p>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(painel);
+
+  painel.querySelectorAll('[data-section]').forEach(button => {
+    button.addEventListener('click', () => {
+      document.getElementById('admin-content').innerHTML = `
+        <h3 style="color:#39e75f">${button.dataset.section}</h3>
+        <p style="color:#bbb">Esta área será conectada ao banco de dados na próxima etapa.</p>
+      `;
+    });
+  });
+}
 }</script>
 </body>
 </html>
